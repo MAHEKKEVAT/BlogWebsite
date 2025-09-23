@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | MindScribe</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">MindScribe</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="editor.html" class="nav-link">New Post</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+            </nav>
+            <div class="user-menu">
+                <span class="username">Loading...</span>
+                <button class="logout-btn">Logout</button>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-section">
+                <h1>Your Dashboard</h1>
+                <p>Manage your blog posts and track your writing journey</p>
+                <a href="editor.html" class="btn-primary">Create New Post</a>
+            </div>
+            
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <h3>Total Posts</h3>
+                    <p class="stat-number">0</p>
+                    <div class="stat-trend">+0 this month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📤</div>
+                    <h3>Published</h3>
+                    <p class="stat-number">0</p>
+                    <div class="stat-trend">Ready to share</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <h3>Drafts</h3>
+                    <p class="stat-number">0</p>
+                    <div class="stat-trend">In progress</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👁️</div>
+                    <h3>Total Views</h3>
+                    <p class="stat-number">0</p>
+                    <div class="stat-trend">All time</div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="actions-grid">
+                    <div class="action-card" onclick="window.location.href='editor.html'">
+                        <div class="action-icon">✏️</div>
+                        <h3>Write New Post</h3>
+                        <p>Start creating fresh content</p>
+                    </div>
+                    <div class="action-card" onclick="showDrafts()">
+                        <div class="action-icon">📋</div>
+                        <h3>View Drafts</h3>
+                        <p>Continue editing saved drafts</p>
+                    </div>
+                    <div class="action-card" onclick="showPublished()">
+                        <div class="action-icon">📊</div>
+                        <h3>Analytics</h3>
+                        <p>Check post performance</p>
+                    </div>
+                    <div class="action-card" onclick="window.location.href='profile.html'">
+                        <div class="action-icon">👤</div>
+                        <h3>Profile Settings</h3>
+                        <p>Update your information</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="posts-section">
+                <div class="section-header">
+                    <h2>Recent Posts</h2>
+                    <div class="view-controls">
+                        <button class="view-btn active" data-filter="all">All</button>
+                        <button class="view-btn" data-filter="published">Published</button>
+                        <button class="view-btn" data-filter="drafts">Drafts</button>
+                    </div>
+                </div>
+                
+                <div class="posts-grid" id="posts-container">
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3>No posts yet</h3>
+                        <p>Start your writing journey by creating your first blog post</p>
+                        <a href="editor.html" class="btn-primary">Create Your First Post</a>
+                    </div>
+                </div>
+                
+                <div class="loading-state" id="loading-state" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your posts...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Logout</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to logout?</p>
+                <div class="modal-warning">
+                    ⚠️ Any unsaved changes will be lost
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel">Cancel</button>
+                <button class="btn-confirm-logout">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor | MindScribe</title>
+    <link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Header -->
+        <header class="editor-header">
+            <div class="logo">MindScribe</div>
+            <nav class="editor-nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <button class="nav-link" onclick="logout()">Logout</button>
+            </nav>
+        </header>
+
+        <!-- Editor Content -->
+        <main class="editor-content">
+            <!-- Status Messages -->
+            <div id="statusMessage" class="status-message"></div>
+            
+            <!-- Loading Spinner -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Saving...</p>
+            </div>
+
+            <!-- Title Input -->
+            <input type="text" id="postTitle" class="title-input" placeholder="Enter your post title...">
+            
+            <!-- Toolbar -->
+            <div class="editor-toolbar">
+                <button type="button" class="toolbar-btn" onclick="formatText('bold')"><b>B</b></button>
+                <button type="button" class="toolbar-btn" onclick="formatText('italic')"><i>I</i></button>
+                <button type="button" class="toolbar-btn" onclick="formatText('underline')"><u>U</u></button>
+                <button type="button" class="toolbar-btn" onclick="formatText('code')">{ }</button>
+                <button type="button" class="toolbar-btn" onclick="insertBullet()">• List</button>
+                <button type="button" class="toolbar-btn" onclick="insertLink()">🔗 Link</button>
+                <button type="button" class="toolbar-btn" onclick="insertImage()">🖼️ Image</button>
+            </div>
+            
+            <!-- Content Textarea -->
+            <textarea id="postContent" class="editor-textarea" placeholder="Start writing your amazing content here..."></textarea>
+            
+            <!-- Word Counter -->
+            <div class="word-counter">
+                <span id="wordCount">0 words</span>
+                <span id="charCount">0 characters</span>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="editor-actions">
+                <button id="saveDraft" class="action-btn btn-draft">Save Draft</button>
+                <button id="previewPost" class="action-btn btn-preview">Preview</button>
+                <button id="publishPost" class="action-btn btn-publish" disabled>Publish</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="preview-modal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2>Post Preview</h2>
+                <button class="close-preview" onclick="closePreview()">Close</button>
+            </div>
+            <div id="previewContent">
+                <!-- Preview content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- Your Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>

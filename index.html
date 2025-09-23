@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindScribe | Minimal Blog Platform</title>
+    <link rel="stylesheet" href="css/splash.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="logo">MindScribe</div>
+        <p class="tagline">A minimalist blogging platform for thoughtful writers</p>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+    </div>
+    
+    <!-- Sign In Page -->
+    <div id="signin-page">
+        <div class="container">
+            <h1>Welcome Back</h1>
+            <p class="subtitle">Sign in to your account</p>
+            
+            <form id="signin-form">
+                <div id="auth-messages"></div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+            
+            <div class="divider"><span>or continue with</span></div>
+            
+            <div class="social-login">
+                <div class="social-btn">G</div>
+                <div class="social-btn">f</div>
+                <div class="social-btn">in</div>
+            </div>
+            
+            <div class="links">
+                <a href="#" id="forgot-password">Forgot your password?</a>
+                <span> • </span>
+                <a href="#" id="create-account">Create an account</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Page -->
+    <div id="register-page" style="display: none;">
+        <div class="container">
+            <h1>Join MindScribe</h1>
+            <p class="subtitle">Create your account to start writing</p>
+            
+            <form id="register-form">
+                <div id="register-messages"></div>
+                
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nickName">Nickname</label>
+                    <input type="text" id="nickName" placeholder="Choose a display name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" placeholder="Enter your city" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <input type="password" id="reg-password" placeholder="Create a password (min. 6 characters)" required>
+                    <div class="password-strength">
+                        <div class="strength-bar"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                    <div class="password-match"></div>
+                </div>
+                
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+            
+            <div class="links">
+                <a href="#" id="back-to-login">Already have an account? Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK MUST be loaded first -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Then your Firebase config -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- Finally your auth logic -->
+    <script src="js/auth.js"></script>
+</body>
+</html>

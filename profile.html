@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | MindScribe</title>
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Header -->
+        <header class="profile-header">
+            <div class="logo">MindScribe</div>
+            <nav class="profile-nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="editor.html" class="nav-link">New Post</a>
+                <a href="index.html" class="nav-link">Home</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <div class="profile-content">
+            <!-- Sidebar -->
+            <aside class="profile-sidebar">
+                <div class="profile-avatar">
+                    <div id="avatarContainer">
+                        <img id="avatarImage" class="avatar-image" src="" alt="Profile Avatar" style="display: none;">
+                        <div id="avatarPlaceholder" class="avatar-placeholder">
+                            <span id="avatarInitials">U</span>
+                        </div>
+                    </div>
+                    <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                    <button class="upload-avatar" onclick="document.getElementById('avatarUpload').click()">
+                        Upload Photo
+                    </button>
+                </div>
+
+                <div class="profile-info">
+                    <h2 id="userName">Loading...</h2>
+                    <p id="userEmail" style="color: #6b7280; margin-bottom: 1rem;">Loading...</p>
+                    <p id="userBio" style="color: #6b7280; font-style: italic;">No bio yet</p>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span>Member since:</span>
+                        <span id="memberSince" class="stat-value">Loading...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Posts published:</span>
+                        <span id="postsCount" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Drafts:</span>
+                        <span id="draftsCount" class="stat-value">0</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Area -->
+            <main class="profile-main">
+                <!-- Status Messages -->
+                <div id="statusMessage" class="status-message"></div>
+
+                <!-- Loading Spinner -->
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="profile-tabs">
+                    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab-btn" onclick="switchTab('edit')">Edit Profile</button>
+                    <button class="tab-btn" onclick="switchTab('posts')">My Posts</button>
+                    <button class="tab-btn" onclick="switchTab('security')">Security</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <!-- Overview Tab -->
+                <div id="overviewTab" class="tab-content active">
+                    <h2>Profile Overview</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span id="totalPosts" class="stat-number">0</span>
+                            <span class="stat-label">Total Posts</span>
+                        </div>
+                        <div class="stat-card">
+                            <span id="publishedPosts" class="stat-number">0</span>
+                            <span class="stat-label">Published</span>
+                        </div>
+                        <div class="stat-card">
+                            <span id="draftPosts" class="stat-number">0</span>
+                            <span class="stat-label">Drafts</span>
+                        </div>
+                        <div class="stat-card">
+                            <span id="accountAge" class="stat-number">0</span>
+                            <span class="stat-label">Days Active</span>
+                        </div>
+                    </div>
+
+                    <div class="recent-activity">
+                        <h3>Recent Activity</h3>
+                        <div id="recentActivity" class="posts-grid">
+                            <!-- Recent posts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Profile Tab -->
+                <div id="editTab" class="tab-content">
+                    <h2>Edit Profile</h2>
+                    <form id="profileForm" class="profile-form">
+                        <div class="form-group">
+                            <label class="form-label" for="displayName">Display Name</label>
+                            <input type="text" id="displayName" class="form-input" placeholder="Enter your display name">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bio">Bio</label>
+                            <textarea id="bio" class="form-input form-textarea" placeholder="Tell us about yourself..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="website">Website</label>
+                            <input type="url" id="website" class="form-input" placeholder="https://example.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="location">Location</label>
+                            <input type="text" id="location" class="form-input" placeholder="Your location">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- My Posts Tab -->
+                <div id="postsTab" class="tab-content">
+                    <h2>My Posts</h2>
+                    <div class="posts-filter">
+                        <button class="btn btn-primary" onclick="filterPosts('all')">All</button>
+                        <button class="btn btn-secondary" onclick="filterPosts('published')">Published</button>
+                        <button class="btn btn-secondary" onclick="filterPosts('drafts')">Drafts</button>
+                    </div>
+                    <div id="postsList" class="posts-grid">
+                        <!-- Posts will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div id="securityTab" class="tab-content">
+                    <h2>Security Settings</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Change Password</label>
+                        <input type="password" id="currentPassword" class="form-input" placeholder="Current password">
+                        <input type="password" id="newPassword" class="form-input" placeholder="New password" style="margin-top: 0.5rem;">
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" style="margin-top: 0.5rem;">
+                        <button class="btn btn-primary" onclick="changePassword()" style="margin-top: 1rem;">Change Password</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Account Actions</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" onclick="exportData()">Export My Data</button>
+                            <button class="btn btn-danger" onclick="showDeleteModal()">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
+            <h3>Delete Account</h3>
+            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+            <p>All your posts, drafts, and data will be permanently deleted.</p>
+            <input type="password" id="deletePassword" class="form-input" placeholder="Enter your password to confirm" style="margin: 1rem 0;">
+            <div class="form-actions">
+                <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+    
+    <!-- Your Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
