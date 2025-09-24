@@ -1,4 +1,4 @@
-/* profile.css - Updated Dashboard Style */
+/* profile.css - Compact Version */
 * {
     margin: 0;
     padding: 0;
@@ -22,7 +22,6 @@ body {
 /* Header */
 .profile-header {
     background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
     padding: 1.5rem 2rem;
     border-radius: 15px;
     margin-bottom: 2rem;
@@ -30,21 +29,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .logo {
     font-size: 2.2rem;
     font-weight: bold;
     color: #4f46e5;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.logo::before {
-    content: "✍️";
-    font-size: 1.8rem;
 }
 
 .profile-nav {
@@ -59,15 +49,11 @@ body {
     border-radius: 10px;
     transition: all 0.3s ease;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .nav-link:hover {
     background: #4f46e5;
     color: white;
-    transform: translateY(-2px);
 }
 
 /* Main Content */
@@ -81,19 +67,15 @@ body {
 /* Sidebar */
 .profile-sidebar {
     background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 2rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     height: 100%;
-    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .profile-avatar {
     text-align: center;
     margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid #f3f4f6;
 }
 
 .avatar-image {
@@ -103,7 +85,6 @@ body {
     object-fit: cover;
     border: 5px solid #4f46e5;
     margin-bottom: 1rem;
-    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
 }
 
 .avatar-placeholder {
@@ -117,7 +98,6 @@ body {
     justify-content: center;
     font-size: 3.5rem;
     margin: 0 auto 1rem;
-    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
 }
 
 .upload-avatar {
@@ -128,20 +108,10 @@ body {
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0 auto;
 }
 
 .upload-avatar:hover {
     background: #3730a3;
-    transform: translateY(-2px);
-}
-
-.profile-info {
-    margin-bottom: 2rem;
 }
 
 .user-name {
@@ -149,17 +119,11 @@ body {
     font-weight: bold;
     color: #1f2937;
     margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .user-email {
     color: #6b7280;
     margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .user-bio {
@@ -168,7 +132,6 @@ body {
     background: #f8fafc;
     padding: 1rem;
     border-radius: 10px;
-    border-left: 4px solid #10b981;
 }
 
 .user-details {
@@ -191,9 +154,6 @@ body {
 }
 
 .detail-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     color: #6b7280;
     font-weight: 500;
 }
@@ -203,25 +163,14 @@ body {
     color: #4f46e5;
 }
 
-.status-badge {
-    background: #10b981;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-/* Main Profile Area */
+/* Main Area */
 .profile-main {
     background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 2rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     height: 100%;
     overflow-y: auto;
-    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .profile-tabs {
@@ -229,9 +178,6 @@ body {
     gap: 0.5rem;
     margin-bottom: 2rem;
     border-bottom: 2px solid #e5e7eb;
-    background: #f8fafc;
-    padding: 0.5rem;
-    border-radius: 12px;
 }
 
 .tab-btn {
@@ -243,20 +189,10 @@ body {
     transition: all 0.3s ease;
     color: #6b7280;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     flex: 1;
-    justify-content: center;
 }
 
 .tab-btn.active {
-    background: #4f46e5;
-    color: white;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-.tab-btn:hover {
     background: #4f46e5;
     color: white;
 }
@@ -272,7 +208,7 @@ body {
 /* Dashboard Stats */
 .dashboard-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -283,17 +219,6 @@ body {
     border-radius: 15px;
     color: white;
     text-align: center;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
 }
 
 .stat-number {
@@ -313,7 +238,6 @@ body {
     background: #f8fafc;
     padding: 1.5rem;
     border-radius: 15px;
-    border: 1px solid #e5e7eb;
 }
 
 .activity-item {
@@ -322,11 +246,6 @@ body {
     gap: 1rem;
     padding: 1rem;
     border-bottom: 1px solid #e5e7eb;
-    transition: background 0.3s ease;
-}
-
-.activity-item:hover {
-    background: white;
 }
 
 .activity-item:last-child {
@@ -342,17 +261,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-}
-
-.activity-content {
-    flex: 1;
 }
 
 .activity-title {
     font-weight: 600;
     color: #1f2937;
-    margin-bottom: 0.25rem;
 }
 
 .activity-time {
@@ -374,9 +287,6 @@ body {
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: #374151;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .form-input {
@@ -386,13 +296,11 @@ body {
     border-radius: 10px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    background: white;
 }
 
 .form-input:focus {
     outline: none;
     border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .form-textarea {
@@ -400,7 +308,6 @@ body {
     min-height: 120px;
 }
 
-/* Buttons */
 .form-actions {
     display: flex;
     gap: 1rem;
@@ -414,9 +321,6 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .btn-primary {
@@ -426,7 +330,6 @@ body {
 
 .btn-primary:hover {
     background: #3730a3;
-    transform: translateY(-2px);
 }
 
 .btn-secondary {
@@ -436,17 +339,6 @@ body {
 
 .btn-secondary:hover {
     background: #4b5563;
-    transform: translateY(-2px);
-}
-
-.btn-danger {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
 }
 
 /* Posts Grid */
@@ -460,12 +352,6 @@ body {
     padding: 1.5rem;
     border-radius: 12px;
     border-left: 4px solid #10b981;
-    transition: transform 0.3s ease;
-}
-
-.post-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .post-card.draft {
@@ -483,7 +369,6 @@ body {
     font-size: 1.3rem;
     font-weight: 600;
     color: #1f2937;
-    margin: 0;
 }
 
 .post-status {
@@ -525,9 +410,6 @@ body {
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .action-btn.edit {
@@ -535,56 +417,9 @@ body {
     color: white;
 }
 
-.action-btn.edit:hover {
-    background: #3730a3;
-}
-
 .action-btn.delete {
     background: #ef4444;
     color: white;
-}
-
-.action-btn.delete:hover {
-    background: #dc2626;
-}
-
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    backdrop-filter: blur(5px);
-}
-
-.modal-content {
-    background: white;
-    margin: 2rem auto;
-    padding: 2rem;
-    border-radius: 20px;
-    max-width: 500px;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #6b7280;
-    transition: color 0.3s ease;
-}
-
-.close-modal:hover {
-    color: #ef4444;
 }
 
 /* Status Messages */
@@ -593,25 +428,18 @@ body {
     border-radius: 10px;
     margin-bottom: 1.5rem;
     display: none;
-    border-left: 4px solid;
 }
 
 .status-success {
     background: #d1fae5;
     color: #065f46;
-    border-left-color: #10b981;
+    border-left: 4px solid #10b981;
 }
 
 .status-error {
     background: #fee2e2;
     color: #991b1b;
-    border-left-color: #ef4444;
-}
-
-.status-warning {
-    background: #fef3c7;
-    color: #92400e;
-    border-left-color: #f59e0b;
+    border-left: 4px solid #ef4444;
 }
 
 /* Loading Spinner */
@@ -636,14 +464,10 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 1024px) {
     .profile-content {
         grid-template-columns: 1fr;
-        height: auto;
-    }
-    
-    .profile-sidebar {
         height: auto;
     }
 }
@@ -652,16 +476,11 @@ body {
     .profile-header {
         flex-direction: column;
         gap: 1rem;
-        text-align: center;
     }
     
     .profile-nav {
         flex-wrap: wrap;
         justify-content: center;
-    }
-    
-    .profile-tabs {
-        flex-direction: column;
     }
     
     .dashboard-stats {
@@ -674,27 +493,5 @@ body {
     
     .btn {
         width: 100%;
-        justify-content: center;
-    }
-    
-    .post-header {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .post-meta {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-    }
-    
-    .post-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-    
-    .modal-content {
-        margin: 1rem;
-        padding: 1.5rem;    
     }
 }

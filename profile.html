@@ -80,13 +80,6 @@
                         </span>
                         <span id="memberSince" class="detail-value">Loading...</span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">
-                            <i class="fas fa-shield-alt"></i>
-                            Status
-                        </span>
-                        <span id="userStatus" class="status-badge">Loading...</span>
-                    </div>
                 </div>
 
                 <div class="profile-stats">
@@ -139,16 +132,12 @@
                         <i class="fas fa-newspaper"></i>
                         My Posts
                     </button>
-                    <button class="tab-btn" onclick="switchTab('security')">
-                        <i class="fas fa-shield-alt"></i>
-                        Security
-                    </button>
                 </div>
 
                 <!-- Tab Contents -->
                 <!-- Overview Tab -->
                 <div id="overviewTab" class="tab-content active">
-                    <h2 style="margin-bottom: 1.5rem;">Dashboard Overview</h2>
+                    <h2 style="margin-bottom: 1.5rem;">Profile Overview</h2>
                     
                     <div class="dashboard-stats">
                         <div class="stat-card">
@@ -159,7 +148,7 @@
                         <div class="stat-card">
                             <div class="stat-icon">🌐</div>
                             <span id="publishedPostsCard" class="stat-number">0</span>
-                            <span class="stat-label">Published Posts</span>
+                            <span class="stat-label">Published</span>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon">📝</div>
@@ -216,14 +205,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="nickName">
-                                <i class="fas fa-at"></i>
-                                Nickname
-                            </label>
-                            <input type="text" id="nickName" class="form-input" placeholder="Enter your nickname">
-                        </div>
-
-                        <div class="form-group">
                             <label class="form-label" for="bio">
                                 <i class="fas fa-info-circle"></i>
                                 Bio
@@ -260,88 +241,16 @@
                             My Posts
                         </h2>
                         <div class="posts-filter">
-                            <button class="btn btn-primary" onclick="filterPosts('all')">
-                                <i class="fas fa-list"></i>
-                                All
-                            </button>
-                            <button class="btn btn-secondary" onclick="filterPosts('published')">
-                                <i class="fas fa-globe"></i>
-                                Published
-                            </button>
-                            <button class="btn btn-secondary" onclick="filterPosts('drafts')">
-                                <i class="fas fa-edit"></i>
-                                Drafts
-                            </button>
+                            <button class="btn btn-primary" onclick="filterPosts('all')">All</button>
+                            <button class="btn btn-secondary" onclick="filterPosts('published')">Published</button>
+                            <button class="btn btn-secondary" onclick="filterPosts('drafts')">Drafts</button>
                         </div>
                     </div>
                     <div id="postsList" class="posts-grid">
                         <!-- Posts will be loaded here -->
                     </div>
                 </div>
-
-                <!-- Security Tab -->
-                <div id="securityTab" class="tab-content">
-                    <h2 style="margin-bottom: 1.5rem;">
-                        <i class="fas fa-shield-alt"></i>
-                        Security Settings
-                    </h2>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-key"></i>
-                            Change Password
-                        </label>
-                        <input type="password" id="currentPassword" class="form-input" placeholder="Current password">
-                        <input type="password" id="newPassword" class="form-input" placeholder="New password" style="margin-top: 0.5rem;">
-                        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" style="margin-top: 0.5rem;">
-                        <button class="btn btn-primary" onclick="changePassword()" style="margin-top: 1rem;">
-                            <i class="fas fa-lock"></i>
-                            Change Password
-                        </button>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-cog"></i>
-                            Account Actions
-                        </label>
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <button class="btn btn-secondary" onclick="exportData()">
-                                <i class="fas fa-download"></i>
-                                Export My Data
-                            </button>
-                            <button class="btn btn-danger" onclick="showDeleteModal()">
-                                <i class="fas fa-trash"></i>
-                                Delete Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </main>
-        </div>
-    </div>
-
-    <!-- Delete Account Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
-            <h3 style="color: #ef4444; margin-bottom: 1rem;">
-                <i class="fas fa-exclamation-triangle"></i>
-                Delete Account
-            </h3>
-            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-            <p style="color: #ef4444; font-weight: bold;">All your posts, drafts, and data will be permanently deleted.</p>
-            <input type="password" id="deletePassword" class="form-input" placeholder="Enter your password to confirm" style="margin: 1rem 0;">
-            <div class="form-actions">
-                <button class="btn btn-danger" onclick="deleteAccount()">
-                    <i class="fas fa-trash"></i>
-                    Delete Account
-                </button>
-                <button class="btn btn-secondary" onclick="closeDeleteModal()">
-                    <i class="fas fa-times"></i>
-                    Cancel
-                </button>
-            </div>
         </div>
     </div>
 
