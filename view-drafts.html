@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Drafts | MindScribe</title>
+    <link rel="stylesheet" href="css/view-drafts.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="drafts-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-pen-fancy"></i>
+                    <span>MindScribe</span>
+                </div>
+                <nav class="nav">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="editor.html" class="nav-link">
+                        <i class="fas fa-edit"></i>
+                        <span>New Post</span>
+                    </a>
+                    <a href="view-posts.html" class="nav-link">
+                        <i class="fas fa-newspaper"></i>
+                        <span>View Posts</span>
+                    </a>
+                    <a href="profile.html" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="user-menu">
+                <div class="user-info">
+                    <span class="username">Loading...</span>
+                    <span class="user-status">Online</span>
+                </div>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="header-content">
+                    <h1>
+                        <i class="fas fa-clipboard-list"></i>
+                        My Drafts
+                    </h1>
+                    <p>Continue working on your unfinished masterpieces</p>
+                </div>
+                <div class="header-actions">
+                    <a href="editor.html" class="btn-primary">
+                        <i class="fas fa-plus"></i>
+                        New Draft
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalDrafts">0</span>
+                    <span class="stat-label">Total Drafts</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="recentDrafts">0</span>
+                    <span class="stat-label">Last 7 Days</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="avgWords">0</span>
+                    <span class="stat-label">Avg. Words</span>
+                </div>
+            </div>
+
+            <!-- Drafts Grid -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>All Drafts</h2>
+                    <div class="search-filter">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search drafts...">
+                        </div>
+                        <select id="sortSelect" class="sort-select">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="title">Title A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="drafts-grid" id="drafts-container">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h3>No drafts yet</h3>
+                        <p>Start writing to see your drafts appear here</p>
+                        <a href="editor.html" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Create First Draft
+                        </a>
+                    </div>
+                </div>
+
+                <div class="loading-state" id="loading-state" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your drafts...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <span class="footer-text">MindScribe Drafts Manager</span>
+                <div class="footer-status">
+                    <span class="status-indicator" id="firebaseStatus">
+                        <i class="fas fa-circle"></i>
+                        Firebase Connecting...
+                    </span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/view-drafts.js"></script>
+</body>
+</html>

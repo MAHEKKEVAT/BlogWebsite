@@ -116,19 +116,19 @@
                         <h3>Write New Post</h3>
                         <p>Start creating fresh content</p>
                     </div>
-                    <div class="action-card" onclick="showDrafts()">
+                    <div class="action-card" onclick="window.location.href='view-drafts.html'">
                         <div class="action-icon">
                             <i class="fas fa-clipboard-list"></i>
                         </div>
                         <h3>View Drafts</h3>
                         <p>Continue editing saved drafts</p>
                     </div>
-                    <div class="action-card" onclick="showPublished()">
+                    <div class="action-card" onclick="window.location.href='view-posts.html'">
                         <div class="action-icon">
-                            <i class="fas fa-chart-line"></i>
+                            <i class="fas fa-newspaper"></i>
                         </div>
-                        <h3>Analytics</h3>
-                        <p>Check post performance</p>
+                        <h3>View Posts</h3>
+                        <p>Manage published content</p>
                     </div>
                     <div class="action-card" onclick="window.location.href='profile.html'">
                         <div class="action-icon">
@@ -144,8 +144,8 @@
             <section class="posts-section">
                 <div class="section-header">
                     <div>
-                        <h2>Your Posts</h2>
-                        <span class="section-subtitle">Manage and organize your content</span>
+                        <h2>Recent Activity</h2>
+                        <span class="section-subtitle">Latest posts and drafts</span>
                     </div>
                     <div class="view-controls">
                         <button class="view-btn active" data-filter="all">
