@@ -1,433 +1,347 @@
-// Dashboard JavaScript with Firebase Integration
+// Dashboard JavaScript - Updated with Quick Actions
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if Firebase services are available
-    if (!window.firebaseAuth || !window.firebaseDb) {
-        console.error('Firebase services not available');
-        redirectToLogin();
-        return;
+    initializeDashboard();
+});
+
+async function initializeDashboard() {
+    try {
+        await checkFirebaseConnection();
+        setupEventListeners();
+        loadDashboardData();
+    } catch (error) {
+        console.error('Dashboard initialization failed:', error);
+        showError('Failed to load dashboard. Please refresh the page.');
     }
+}
 
-    // DOM Elements
-    const logoutBtn = document.querySelector('.logout-btn');
-    const usernameSpan = document.querySelector('.username');
-    const postsContainer = document.getElementById('posts-container');
-    const loadingState = document.getElementById('loading-state');
-    const statNumbers = document.querySelectorAll('.stat-number');
-    const viewBtns = document.querySelectorAll('.view-btn');
-    const logoutModal = document.getElementById('logout-modal');
-    const cancelBtn = document.querySelector('.btn-cancel');
-    const confirmLogoutBtn = document.querySelector('.btn-confirm-logout');
-
-    let currentUser = null;
-    let allPosts = [];
-    let currentFilter = 'all';
-
-    // Check authentication state
-    window.firebaseAuth.onAuthStateChanged(function(user) {
-        if (user) {
-            currentUser = user;
-            console.log('User authenticated:', user.email);
-            loadUserData(user.uid);
-            loadUserPosts(user.uid);
-            setupNavigationProtection();
-        } else {
-            console.log('No user authenticated, redirecting to login');
-            redirectToLogin();
-        }
-    });
-
-    // Load user data from Firestore
-    function loadUserData(userId) {
-        window.firebaseDb.collection('users').doc(userId).get()
-            .then((doc) => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    // Update UI with user data
-                    const displayName = userData.nickName || userData.displayName || userData.email.split('@')[0];
-                    usernameSpan.textContent = displayName;
-                    usernameSpan.title = userData.email;
-                    
-                    console.log('User data loaded:', userData);
-                } else {
-                    console.log('No user document found, creating one...');
-                    createUserDocument(userId);
-                }
-            })
-            .catch((error) => {
-                console.error('Error loading user data:', error);
-                showError('Failed to load user data');
-            });
-    }
-
-    // Create user document if it doesn't exist
-    function createUserDocument(userId) {
-        const userData = {
-            uid: userId,
-            email: currentUser.email,
-            displayName: currentUser.email.split('@')[0],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-            profileComplete: false,
-            role: 'user',
-            status: 'active'
-        };
-        
-        window.firebaseDb.collection('users').doc(userId).set(userData)
-            .then(() => {
-                console.log('User document created');
-                loadUserData(userId);
-            })
-            .catch((error) => {
-                console.error('Error creating user document:', error);
-            });
-    }
-
-    // Load user posts from Firestore
-    function loadUserPosts(userId) {
-        showLoading();
-        
-        // Load published posts
-        const publishedPromise = window.firebaseDb.collection('users').doc(userId)
-            .collection('published')
-            .orderBy('publishedAt', 'desc')
-            .get();
-            
-        // Load draft posts
-        const draftsPromise = window.firebaseDb.collection('users').doc(userId)
-            .collection('drafts')
-            .orderBy('updatedAt', 'desc')
-            .get();
-            
-        Promise.all([publishedPromise, draftsPromise])
-            .then(([publishedSnapshot, draftsSnapshot]) => {
-                allPosts = [];
-                let totalPosts = 0;
-                let publishedPosts = 0;
-                let draftPosts = 0;
-                
-                // Process published posts
-                publishedSnapshot.forEach((doc) => {
-                    const post = {
-                        id: doc.id,
-                        ...doc.data(),
-                        published: true
-                    };
-                    allPosts.push(post);
-                    totalPosts++;
-                    publishedPosts++;
-                });
-                
-                // Process draft posts
-                draftsSnapshot.forEach((doc) => {
-                    const post = {
-                        id: doc.id,
-                        ...doc.data(),
-                        published: false
-                    };
-                    allPosts.push(post);
-                    totalPosts++;
-                    draftPosts++;
-                });
-                
-                // Sort all posts by date (newest first)
-                allPosts.sort((a, b) => {
-                    const dateA = a.publishedAt || a.updatedAt || a.createdAt;
-                    const dateB = b.publishedAt || b.updatedAt || b.createdAt;
-                    return dateB - dateA;
-                });
-                
-                updateStats(totalPosts, publishedPosts, draftPosts);
-                displayPosts(allPosts);
-                hideLoading();
-            })
-            .catch((error) => {
-                console.error('Error loading posts:', error);
-                hideLoading();
-                showError('Failed to load posts. Please try again.');
-            });
-    }
-
-    // Display posts based on current filter
-    function displayPosts(posts) {
-        const filteredPosts = posts.filter(post => {
-            if (currentFilter === 'published') return post.published;
-            if (currentFilter === 'drafts') return !post.published;
-            return true; // 'all'
-        });
-        
-        if (filteredPosts.length === 0) {
-            showEmptyState();
-            return;
-        }
-        
-        postsContainer.innerHTML = '';
-        
-        filteredPosts.forEach(post => {
-            const postCard = createPostCard(post);
-            postsContainer.appendChild(postCard);
-        });
-    }
-
-    // Create post card element
-    function createPostCard(post) {
-        const postCard = document.createElement('div');
-        postCard.className = 'post-card';
-        postCard.innerHTML = `
-            <h3 class="post-title">${escapeHtml(post.title || 'Untitled Post')}</h3>
-            <p class="post-excerpt">${escapeHtml(post.excerpt || 'No excerpt available')}</p>
-            <div class="post-meta">
-                <span class="post-date">${formatDate(post.publishedAt || post.updatedAt || post.createdAt)}</span>
-                <span class="post-status ${post.published ? 'published' : 'draft'}">
-                    ${post.published ? 'Published' : 'Draft'}
-                </span>
-                <span class="post-read-time">${post.readTime || 1} min read</span>
-            </div>
-            <div class="post-actions">
-                <button class="btn-edit" data-id="${post.id}">Edit</button>
-                <button class="btn-delete" data-id="${post.id}">Delete</button>
-                ${post.published ? 
-                    '<button class="btn-view" data-id="${post.id}">View</button>' : 
-                    '<button class="btn-publish" data-id="${post.id}">Publish</button>'
-                }
-            </div>
-        `;
-        
-        // Add event listeners
-        const editBtn = postCard.querySelector('.btn-edit');
-        const deleteBtn = postCard.querySelector('.btn-delete');
-        const actionBtn = postCard.querySelector(post.published ? '.btn-view' : '.btn-publish');
-        
-        editBtn.addEventListener('click', () => editPost(post.id, post.published));
-        deleteBtn.addEventListener('click', () => deletePost(post.id, post.published));
-        actionBtn.addEventListener('click', () => post.published ? viewPost(post.id) : publishPost(post.id));
-        
-        return postCard;
-    }
-
-    // Update stats display
-    function updateStats(total, published, draft) {
-        if (statNumbers.length >= 3) {
-            statNumbers[0].textContent = total;
-            statNumbers[1].textContent = published;
-            statNumbers[2].textContent = draft;
-        }
-    }
-
-    // Post actions
-    function editPost(postId, isPublished) {
-        window.location.href = `editor.html?edit=${postId}`;
-    }
-
-    function viewPost(postId) {
-        window.location.href = `post.html?id=${postId}`;
-    }
-
-    function publishPost(postId) {
-        if (confirm('Publish this post?')) {
-            // Get the draft first
-            window.firebaseDb.collection('users').doc(currentUser.uid)
-                .collection('drafts').doc(postId).get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        const postData = doc.data();
-                        const batch = window.firebaseDb.batch();
-                        
-                        // Add to published
-                        const publishedRef = window.firebaseDb.collection('users').doc(currentUser.uid)
-                            .collection('published').doc(postId);
-                        batch.set(publishedRef, {
-                            ...postData,
-                            published: true,
-                            publishedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        
-                        // Remove from drafts
-                        const draftRef = window.firebaseDb.collection('users').doc(currentUser.uid)
-                            .collection('drafts').doc(postId);
-                        batch.delete(draftRef);
-                        
-                        return batch.commit();
-                    }
-                })
-                .then(() => {
-                    showSuccess('Post published successfully!');
-                    loadUserPosts(currentUser.uid);
-                })
-                .catch((error) => {
-                    console.error('Error publishing post:', error);
-                    showError('Failed to publish post');
-                });
-        }
-    }
-
-    function deletePost(postId, isPublished) {
-        if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-            const collection = isPublished ? 'published' : 'drafts';
-            window.firebaseDb.collection('users').doc(currentUser.uid)
-                .collection(collection).doc(postId).delete()
-                .then(() => {
-                    showSuccess('Post deleted successfully!');
-                    loadUserPosts(currentUser.uid);
-                })
-                .catch((error) => {
-                    console.error('Error deleting post:', error);
-                    showError('Failed to delete post');
-                });
-        }
-    }
-
-    // View filter functionality
-    viewBtns.forEach(btn => {
+function setupEventListeners() {
+    // View filter buttons
+    document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            viewBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            currentFilter = this.dataset.filter;
-            displayPosts(allPosts);
+            filterPosts(this.dataset.filter);
         });
     });
 
     // Logout functionality
-    logoutBtn.addEventListener('click', function() {
-        logoutModal.style.display = 'block';
-    });
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', showLogoutModal);
+    }
+}
 
-    cancelBtn.addEventListener('click', function() {
-        logoutModal.style.display = 'none';
-    });
+async function loadDashboardData() {
+    const user = window.firebaseAuth.currentUser;
+    if (!user) {
+        window.location.href = 'index.html';
+        return;
+    }
 
-    confirmLogoutBtn.addEventListener('click', function() {
-        window.firebaseAuth.signOut().then(() => {
-            console.log('User signed out');
-            localStorage.setItem('logout', Date.now());
-            window.location.href = 'index.html';
-        }).catch((error) => {
-            console.error('Logout error:', error);
-            showError('Logout failed. Please try again.');
-        });
-    });
+    showLoading(true);
 
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        if (event.target === logoutModal) {
-            logoutModal.style.display = 'none';
+    try {
+        // Update username
+        const userDoc = await window.firebaseDb.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            document.querySelector('.username').textContent = 
+                userData.displayName || userData.email.split('@')[0];
         }
-    });
 
-    // Navigation protection
-    function setupNavigationProtection() {
-        window.addEventListener('beforeunload', function(e) {
-            if (!localStorage.getItem('logout')) {
-                const message = 'You have unsaved changes. Are you sure you want to leave?';
-                e.returnValue = message;
-                return message;
-            }
+        // Load both drafts and published posts
+        const [draftsSnapshot, publishedSnapshot] = await Promise.all([
+            window.firebaseDb.collection('users')
+                .doc(user.uid)
+                .collection('drafts')
+                .orderBy('updatedAt', 'desc')
+                .limit(10)
+                .get(),
+            window.firebaseDb.collection('users')
+                .doc(user.uid)
+                .collection('published')
+                .orderBy('publishedAt', 'desc')
+                .limit(10)
+                .get()
+        ]);
+
+        const allPosts = [
+            ...publishedSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                published: true,
+                type: 'published'
+            })),
+            ...draftsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                published: false,
+                type: 'draft'
+            }))
+        ].sort((a, b) => {
+            const dateA = a.publishedAt || a.updatedAt;
+            const dateB = b.publishedAt || b.updatedAt;
+            return new Date(dateB) - new Date(dateA);
         });
-    }
 
-    // Utility functions
-    function formatDate(timestamp) {
-        if (!timestamp) return 'Unknown date';
-        try {
-            const date = timestamp.toDate();
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        } catch (error) {
-            return 'Invalid date';
-        }
-    }
+        displayPosts(allPosts.slice(0, 6)); // Show latest 6 posts
+        updateStats(publishedSnapshot.size, draftsSnapshot.size);
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        showError('Failed to load dashboard data');
+    } finally {
+        showLoading(false);
     }
+}
 
-    function showLoading() {
-        loadingState.style.display = 'block';
-        postsContainer.style.display = 'none';
-    }
-
-    function hideLoading() {
-        loadingState.style.display = 'none';
-        postsContainer.style.display = 'grid';
-    }
-
-    function showEmptyState() {
-        postsContainer.innerHTML = `
+function displayPosts(posts) {
+    const container = document.getElementById('posts-container');
+    
+    if (!posts || posts.length === 0) {
+        container.innerHTML = `
             <div class="empty-state">
-                <div class="empty-icon">📝</div>
-                <h3>No ${currentFilter === 'all' ? 'posts' : currentFilter} yet</h3>
+                <div class="empty-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3>No posts yet</h3>
                 <p>Start your writing journey by creating your first blog post</p>
-                <a href="editor.html" class="btn-primary">Create Your First Post</a>
+                <a href="editor.html" class="btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Create Your First Post
+                </a>
             </div>
         `;
+        return;
     }
 
-    function showSuccess(message) {
-        // Create and show success message
-        const messageEl = document.createElement('div');
-        messageEl.className = 'message message-success';
-        messageEl.textContent = message;
-        messageEl.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            animation: slideInRight 0.3s ease;
-        `;
-        
-        document.body.appendChild(messageEl);
-        setTimeout(() => {
-            messageEl.remove();
-        }, 3000);
-    }
+    const postsHTML = posts.map(post => createPostCard(post)).join('');
+    container.innerHTML = postsHTML;
+}
 
-    function showError(message) {
-        // Create and show error message
-        const messageEl = document.createElement('div');
-        messageEl.className = 'message message-error';
-        messageEl.textContent = message;
-        messageEl.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            animation: slideInRight 0.3s ease;
-        `;
-        
-        document.body.appendChild(messageEl);
-        setTimeout(() => {
-            messageEl.remove();
-        }, 5000);
-    }
+function createPostCard(post) {
+    const wordCount = post.content ? post.content.split(/\s+/).length : 0;
+    const readTime = Math.ceil(wordCount / 200);
+    const date = post.published ? 
+        (post.publishedAt ? formatDate(post.publishedAt.toDate()) : 'Unknown') :
+        (post.updatedAt ? formatDate(post.updatedAt.toDate()) : 'Unknown');
 
-    function redirectToLogin() {
-        window.location.href = 'index.html';
-    }
+    return `
+        <div class="post-card" data-type="${post.type}">
+            <h3 class="post-title">${post.title || 'Untitled Post'}</h3>
+            <p class="post-excerpt">${post.excerpt || 'No content available...'}</p>
+            <div class="post-meta">
+                <span class="post-date">${date}</span>
+                <span class="post-status ${post.published ? 'published' : 'draft'}">
+                    ${post.published ? 'Published' : 'Draft'}
+                </span>
+                <span class="post-read-time">${readTime} min read</span>
+            </div>
+            <div class="post-actions">
+                <button class="btn-edit" onclick="editPost('${post.id}', ${post.published})">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn-delete" onclick="deletePost('${post.id}', ${post.published})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                ${post.published ? 
+                    `<button class="btn-view" onclick="viewPost('${post.id}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>` :
+                    `<button class="btn-publish" onclick="publishPost('${post.id}')">
+                        <i class="fas fa-paper-plane"></i> Publish
+                    </button>`
+                }
+            </div>
+        </div>
+    `;
+}
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey || e.metaKey) {
-            switch(e.key) {
-                case 'n':
-                    e.preventDefault();
-                    window.location.href = 'editor.html';
-                    break;
-                case 'l':
-                    e.preventDefault();
-                    logoutModal.style.display = 'block';
-                    break;
-            }
-        }
+function filterPosts(filter) {
+    const posts = document.querySelectorAll('.post-card');
+    posts.forEach(post => {
+        const shouldShow = filter === 'all' || post.dataset.type === filter;
+        post.style.display = shouldShow ? 'block' : 'none';
     });
 
-    console.log('Dashboard initialized successfully');
-});
+    // Show empty state if no posts match filter
+    const visiblePosts = document.querySelectorAll('.post-card[style=""]');
+    const emptyState = document.querySelector('.empty-state');
+    if (visiblePosts.length === 0 && emptyState) {
+        emptyState.style.display = 'block';
+    }
+}
+
+function updateStats(publishedCount, draftsCount) {
+    const total = publishedCount + draftsCount;
+    
+    const statNumbers = document.querySelectorAll('.stat-number');
+    if (statNumbers.length >= 3) {
+        statNumbers[0].textContent = total;
+        statNumbers[1].textContent = publishedCount;
+        statNumbers[2].textContent = draftsCount;
+    }
+}
+
+// Global functions for quick actions
+window.showDrafts = () => {
+    window.location.href = 'view-drafts.html';
+};
+
+window.showPublished = () => {
+    window.location.href = 'view-posts.html';
+};
+
+window.editPost = (id, isPublished) => {
+    window.location.href = `editor.html?edit=${id}`;
+};
+
+window.deletePost = (id, isPublished) => {
+    if (confirm('Delete this post?')) {
+        const collection = isPublished ? 'published' : 'drafts';
+        window.firebaseDb.collection('users').doc(window.firebaseAuth.currentUser.uid)
+            .collection(collection).doc(id).delete()
+            .then(() => loadDashboardData())
+            .catch(error => showError('Failed to delete post'));
+    }
+};
+
+window.publishPost = (id) => {
+    if (confirm('Publish this draft?')) {
+        const user = window.firebaseAuth.currentUser;
+        if (!user) return;
+
+        // Get draft and move to published
+        window.firebaseDb.collection('users').doc(user.uid)
+            .collection('drafts').doc(id).get()
+            .then(doc => {
+                if (doc.exists) {
+                    const batch = window.firebaseDb.batch();
+                    const publishedRef = window.firebaseDb.collection('users').doc(user.uid)
+                        .collection('published').doc(id);
+                    const draftRef = window.firebaseDb.collection('users').doc(user.uid)
+                        .collection('drafts').doc(id);
+
+                    batch.set(publishedRef, {
+                        ...doc.data(),
+                        publishedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'published'
+                    });
+                    batch.delete(draftRef);
+                    
+                    return batch.commit();
+                }
+            })
+            .then(() => {
+                showSuccess('Draft published successfully!');
+                loadDashboardData();
+            })
+            .catch(error => showError('Failed to publish draft'));
+    }
+};
+
+window.viewPost = (id) => {
+    showSuccess('Post view functionality would open the published post');
+};
+
+// Utility functions
+function checkFirebaseConnection() {
+    return new Promise((resolve) => {
+        const statusElement = document.getElementById('firebaseStatus');
+        
+        window.firebaseAuth.onAuthStateChanged((user) => {
+            if (user) {
+                updateFirebaseStatus('connected');
+                resolve(user);
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        setTimeout(() => {
+            if (window.firebaseAuth && window.firebaseDb) {
+                updateFirebaseStatus('connected');
+                resolve();
+            }
+        }, 2000);
+    });
+}
+
+function updateFirebaseStatus(status) {
+    const element = document.getElementById('firebaseStatus');
+    element.className = `status-indicator ${status}`;
+    
+    switch(status) {
+        case 'connected':
+            element.innerHTML = '<i class="fas fa-check-circle"></i> Firebase Connected';
+            break;
+        case 'error':
+            element.innerHTML = '<i class="fas fa-exclamation-circle"></i> Firebase Error';
+            break;
+        default:
+            element.innerHTML = '<i class="fas fa-circle"></i> Firebase Connecting...';
+    }
+}
+
+function formatDate(date) {
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function showLoading(show) {
+    const loadingState = document.getElementById('loading-state');
+    const postsContainer = document.getElementById('posts-container');
+    
+    if (loadingState) loadingState.style.display = show ? 'block' : 'none';
+    if (postsContainer) postsContainer.style.display = show ? 'none' : 'grid';
+}
+
+function showSuccess(message) {
+    showNotification(message, 'success');
+}
+
+function showError(message) {
+    showNotification(message, 'error');
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+        <span>${message}</span>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        background: ${type === 'success' ? '#d1fae5' : '#fee2e2'};
+        color: ${type === 'success' ? '#065f46' : '#991b1b'};
+        border: 1px solid ${type === 'success' ? '#a7f3d0' : '#fecaca'};
+        animation: slideInRight 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function showLogoutModal() {
+    if (confirm('Are you sure you want to logout?')) {
+        window.firebaseAuth.signOut().then(() => {
+            window.location.href = 'index.html';
+        });
+    }
+}

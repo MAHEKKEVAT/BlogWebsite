@@ -1,9 +1,9 @@
-/* View Drafts Styles */
+/* View Posts Styles */
 :root {
     --primary: #6366f1;
     --primary-dark: #4f46e5;
     --secondary: #10b981;
-    --warning: #f59e0b;
+    --success: #22c55e;
     --background: #f8fafc;
     --surface: #ffffff;
     --text: #334155;
@@ -12,7 +12,7 @@
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.drafts-container {
+.posts-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -119,7 +119,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    background: var(--surface);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
     padding: 2rem;
     border-radius: 16px;
     box-shadow: var(--shadow);
@@ -130,12 +131,11 @@
     align-items: center;
     gap: 1rem;
     font-size: 2.5rem;
-    color: var(--text);
     margin-bottom: 0.5rem;
 }
 
 .header-content p {
-    color: var(--text-light);
+    opacity: 0.9;
     font-size: 1.1rem;
 }
 
@@ -144,16 +144,17 @@
     align-items: center;
     gap: 0.5rem;
     padding: 1rem 2rem;
-    background: var(--primary);
+    background: rgba(255, 255, 255, 0.2);
     color: white;
     text-decoration: none;
     border-radius: 10px;
     font-weight: 600;
     transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary:hover {
-    background: var(--primary-dark);
+    background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
 }
 
@@ -171,6 +172,11 @@
     border-radius: 12px;
     text-align: center;
     box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
 }
 
 .stat-number {
@@ -184,6 +190,7 @@
 .stat-label {
     color: var(--text-light);
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
 /* Content Section */
@@ -230,6 +237,12 @@
     border-radius: 8px;
     width: 250px;
     font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
 }
 
 .sort-select {
@@ -238,61 +251,68 @@
     border-radius: 8px;
     background: var(--surface);
     color: var(--text);
+    cursor: pointer;
 }
 
-/* Drafts Grid */
-.drafts-grid {
+/* Posts Grid */
+.posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: 1.5rem;
 }
 
-.draft-card {
+.post-card {
     background: var(--background);
     padding: 1.5rem;
     border-radius: 12px;
-    border-left: 4px solid var(--warning);
+    border-left: 4px solid var(--success);
     transition: all 0.3s ease;
     position: relative;
+    overflow: hidden;
 }
 
-.draft-card:hover {
+.post-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.draft-header {
+.post-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--success), var(--primary));
+}
+
+.post-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
 }
 
-.draft-title {
-    font-size: 1.2rem;
+.post-title {
+    font-size: 1.3rem;
     font-weight: 600;
     color: var(--text);
     margin: 0;
     flex: 1;
+    line-height: 1.3;
 }
 
-.draft-meta {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--text-light);
-}
-
-.draft-badge {
-    background: var(--warning);
+.post-badge {
+    background: var(--success);
     color: white;
-    padding: 0.2rem 0.6rem;
-    border-radius: 12px;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
     font-size: 0.7rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
-.draft-excerpt {
+.post-excerpt {
     color: var(--text-light);
     line-height: 1.5;
     margin-bottom: 1rem;
@@ -302,7 +322,7 @@
     overflow: hidden;
 }
 
-.draft-stats {
+.post-stats {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -311,12 +331,28 @@
     color: var(--text-light);
 }
 
-.draft-actions {
+.stat-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.post-date {
+    font-weight: 500;
+    color: var(--text);
+}
+
+.post-actions {
     display: flex;
     gap: 0.5rem;
 }
 
-.draft-btn {
+.post-btn {
     display: flex;
     align-items: center;
     gap: 0.3rem;
@@ -328,6 +364,7 @@
     transition: all 0.3s ease;
     flex: 1;
     justify-content: center;
+    font-weight: 500;
 }
 
 .btn-edit {
@@ -335,18 +372,44 @@
     color: #1565c0;
 }
 
+.btn-edit:hover {
+    background: #bbdefb;
+    transform: translateY(-1px);
+}
+
 .btn-delete {
     background: #ffebee;
     color: #c62828;
 }
 
-.btn-publish {
+.btn-delete:hover {
+    background: #ffcdd2;
+    transform: translateY(-1px);
+}
+
+.btn-view {
     background: #e8f5e9;
     color: #2e7d32;
 }
 
-.draft-btn:hover {
+.btn-view:hover {
+    background: #c8e6c9;
     transform: translateY(-1px);
+}
+
+/* Featured Post */
+.post-card.featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+    border-left: 4px solid var(--primary);
+}
+
+.post-card.featured::before {
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+}
+
+.post-card.featured .post-badge {
+    background: var(--primary);
 }
 
 /* Empty State */
@@ -361,11 +424,18 @@
     font-size: 4rem;
     margin-bottom: 1rem;
     color: var(--border);
+    opacity: 0.5;
 }
 
 .empty-state h3 {
     color: var(--text);
     margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
 }
 
 /* Loading State */
@@ -419,17 +489,30 @@
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     background: var(--background);
+    transition: all 0.3s ease;
 }
 
 .status-indicator.connected {
-    color: var(--secondary);
+    color: var(--success);
+    background: #f0fdf4;
 }
 
 .status-indicator.connected i {
-    color: var(--secondary);
+    color: var(--success);
+}
+
+.status-indicator.connecting {
+    color: var(--warning);
+    background: #fffbeb;
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .posts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
     .header {
         flex-direction: column;
@@ -453,6 +536,12 @@
         flex-direction: column;
         gap: 1rem;
         text-align: center;
+        padding: 1.5rem;
+    }
+    
+    .header-content h1 {
+        font-size: 2rem;
+        justify-content: center;
     }
     
     .section-header {
@@ -469,7 +558,87 @@
         width: 100%;
     }
     
-    .drafts-grid {
+    .posts-grid {
         grid-template-columns: 1fr;
     }
+    
+    .post-card.featured {
+        grid-column: 1;
+    }
+    
+    .stat-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .post-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 1rem;
+    }
+    
+    .content-section {
+        padding: 1.5rem;
+    }
+    
+    .stats-bar {
+        grid-template-columns: 1fr;
+    }
+    
+    .post-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .post-badge {
+        align-self: flex-start;
+    }
+}
+
+/* Animation for new posts */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.post-card {
+    animation: slideIn 0.5s ease;
+}
+
+/* Hover effects */
+.post-card:hover .post-title {
+    color: var(--primary);
+}
+
+/* Custom scrollbar for posts grid */
+.posts-grid {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.posts-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.posts-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.posts-grid::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.posts-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--text-light);
 }

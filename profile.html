@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile | MindScribe</title>
+    <title>Profile Dashboard | MindScribe</title>
     <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="profile-container">
@@ -12,9 +13,18 @@
         <header class="profile-header">
             <div class="logo">MindScribe</div>
             <nav class="profile-nav">
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-                <a href="editor.html" class="nav-link">New Post</a>
-                <a href="index.html" class="nav-link">Home</a>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="editor.html" class="nav-link">
+                    <i class="fas fa-edit"></i>
+                    New Post
+                </a>
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    Home
+                </a>
             </nav>
         </header>
 
@@ -31,28 +41,75 @@
                     </div>
                     <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
                     <button class="upload-avatar" onclick="document.getElementById('avatarUpload').click()">
+                        <i class="fas fa-camera"></i>
                         Upload Photo
                     </button>
                 </div>
 
                 <div class="profile-info">
-                    <h2 id="userName">Loading...</h2>
-                    <p id="userEmail" style="color: #6b7280; margin-bottom: 1rem;">Loading...</p>
-                    <p id="userBio" style="color: #6b7280; font-style: italic;">No bio yet</p>
+                    <h1 class="user-name">
+                        <i class="fas fa-user"></i>
+                        <span id="userName">Loading...</span>
+                    </h1>
+                    <p class="user-email">
+                        <i class="fas fa-envelope"></i>
+                        <span id="userEmail">Loading...</span>
+                    </p>
+                    <p class="user-bio" id="userBio">No bio yet</p>
+                </div>
+
+                <div class="user-details">
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-map-marker-alt"></i>
+                            City
+                        </span>
+                        <span id="userCity" class="detail-value">Loading...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-user-tag"></i>
+                            Role
+                        </span>
+                        <span id="userRole" class="detail-value">Loading...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Member since
+                        </span>
+                        <span id="memberSince" class="detail-value">Loading...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-shield-alt"></i>
+                            Status
+                        </span>
+                        <span id="userStatus" class="status-badge">Loading...</span>
+                    </div>
                 </div>
 
                 <div class="profile-stats">
-                    <div class="stat-item">
-                        <span>Member since:</span>
-                        <span id="memberSince" class="stat-value">Loading...</span>
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-file-alt"></i>
+                            Total Posts
+                        </span>
+                        <span id="totalPosts" class="detail-value">0</span>
                     </div>
-                    <div class="stat-item">
-                        <span>Posts published:</span>
-                        <span id="postsCount" class="stat-value">0</span>
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-globe"></i>
+                            Published
+                        </span>
+                        <span id="publishedCount" class="detail-value">0</span>
                     </div>
-                    <div class="stat-item">
-                        <span>Drafts:</span>
-                        <span id="draftsCount" class="stat-value">0</span>
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-edit"></i>
+                            Drafts
+                        </span>
+                        <span id="draftsCount" class="detail-value">0</span>
                     </div>
                 </div>
             </aside>
@@ -65,86 +122,157 @@
                 <!-- Loading Spinner -->
                 <div id="loading" class="loading">
                     <div class="spinner"></div>
-                    <p>Loading...</p>
+                    <p>Loading your dashboard...</p>
                 </div>
 
                 <!-- Tabs -->
                 <div class="profile-tabs">
-                    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
-                    <button class="tab-btn" onclick="switchTab('edit')">Edit Profile</button>
-                    <button class="tab-btn" onclick="switchTab('posts')">My Posts</button>
-                    <button class="tab-btn" onclick="switchTab('security')">Security</button>
+                    <button class="tab-btn active" onclick="switchTab('overview')">
+                        <i class="fas fa-chart-line"></i>
+                        Overview
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('edit')">
+                        <i class="fas fa-user-edit"></i>
+                        Edit Profile
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('posts')">
+                        <i class="fas fa-newspaper"></i>
+                        My Posts
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('security')">
+                        <i class="fas fa-shield-alt"></i>
+                        Security
+                    </button>
                 </div>
 
                 <!-- Tab Contents -->
                 <!-- Overview Tab -->
                 <div id="overviewTab" class="tab-content active">
-                    <h2>Profile Overview</h2>
-                    <div class="stats-grid">
+                    <h2 style="margin-bottom: 1.5rem;">Dashboard Overview</h2>
+                    
+                    <div class="dashboard-stats">
                         <div class="stat-card">
-                            <span id="totalPosts" class="stat-number">0</span>
+                            <div class="stat-icon">📊</div>
+                            <span id="totalPostsCard" class="stat-number">0</span>
                             <span class="stat-label">Total Posts</span>
                         </div>
                         <div class="stat-card">
-                            <span id="publishedPosts" class="stat-number">0</span>
-                            <span class="stat-label">Published</span>
+                            <div class="stat-icon">🌐</div>
+                            <span id="publishedPostsCard" class="stat-number">0</span>
+                            <span class="stat-label">Published Posts</span>
                         </div>
                         <div class="stat-card">
-                            <span id="draftPosts" class="stat-number">0</span>
+                            <div class="stat-icon">📝</div>
+                            <span id="draftPostsCard" class="stat-number">0</span>
                             <span class="stat-label">Drafts</span>
                         </div>
                         <div class="stat-card">
+                            <div class="stat-icon">📅</div>
                             <span id="accountAge" class="stat-number">0</span>
                             <span class="stat-label">Days Active</span>
                         </div>
                     </div>
 
-                    <div class="recent-activity">
-                        <h3>Recent Activity</h3>
-                        <div id="recentActivity" class="posts-grid">
-                            <!-- Recent posts will be loaded here -->
+                    <div class="activity-feed">
+                        <h3 style="margin-bottom: 1rem;">
+                            <i class="fas fa-history"></i>
+                            Recent Activity
+                        </h3>
+                        <div id="recentActivity">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Profile Created</div>
+                                    <div class="activity-time" id="profileCreatedTime">Just now</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Edit Profile Tab -->
                 <div id="editTab" class="tab-content">
-                    <h2>Edit Profile</h2>
+                    <h2 style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-user-edit"></i>
+                        Edit Profile
+                    </h2>
                     <form id="profileForm" class="profile-form">
                         <div class="form-group">
-                            <label class="form-label" for="displayName">Display Name</label>
+                            <label class="form-label" for="displayName">
+                                <i class="fas fa-signature"></i>
+                                Display Name
+                            </label>
                             <input type="text" id="displayName" class="form-input" placeholder="Enter your display name">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="bio">Bio</label>
+                            <label class="form-label" for="fullName">
+                                <i class="fas fa-user"></i>
+                                Full Name
+                            </label>
+                            <input type="text" id="fullName" class="form-input" placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="nickName">
+                                <i class="fas fa-at"></i>
+                                Nickname
+                            </label>
+                            <input type="text" id="nickName" class="form-input" placeholder="Enter your nickname">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bio">
+                                <i class="fas fa-info-circle"></i>
+                                Bio
+                            </label>
                             <textarea id="bio" class="form-input form-textarea" placeholder="Tell us about yourself..."></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="website">Website</label>
-                            <input type="url" id="website" class="form-input" placeholder="https://example.com">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="location">Location</label>
-                            <input type="text" id="location" class="form-input" placeholder="Your location">
+                            <label class="form-label" for="city">
+                                <i class="fas fa-city"></i>
+                                City
+                            </label>
+                            <input type="text" id="city" class="form-input" placeholder="Enter your city">
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                            <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Save Changes
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo"></i>
+                                Reset
+                            </button>
                         </div>
                     </form>
                 </div>
 
                 <!-- My Posts Tab -->
                 <div id="postsTab" class="tab-content">
-                    <h2>My Posts</h2>
-                    <div class="posts-filter">
-                        <button class="btn btn-primary" onclick="filterPosts('all')">All</button>
-                        <button class="btn btn-secondary" onclick="filterPosts('published')">Published</button>
-                        <button class="btn btn-secondary" onclick="filterPosts('drafts')">Drafts</button>
+                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin: 0;">
+                            <i class="fas fa-newspaper"></i>
+                            My Posts
+                        </h2>
+                        <div class="posts-filter">
+                            <button class="btn btn-primary" onclick="filterPosts('all')">
+                                <i class="fas fa-list"></i>
+                                All
+                            </button>
+                            <button class="btn btn-secondary" onclick="filterPosts('published')">
+                                <i class="fas fa-globe"></i>
+                                Published
+                            </button>
+                            <button class="btn btn-secondary" onclick="filterPosts('drafts')">
+                                <i class="fas fa-edit"></i>
+                                Drafts
+                            </button>
+                        </div>
                     </div>
                     <div id="postsList" class="posts-grid">
                         <!-- Posts will be loaded here -->
@@ -153,21 +281,39 @@
 
                 <!-- Security Tab -->
                 <div id="securityTab" class="tab-content">
-                    <h2>Security Settings</h2>
+                    <h2 style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Settings
+                    </h2>
                     
                     <div class="form-group">
-                        <label class="form-label">Change Password</label>
+                        <label class="form-label">
+                            <i class="fas fa-key"></i>
+                            Change Password
+                        </label>
                         <input type="password" id="currentPassword" class="form-input" placeholder="Current password">
                         <input type="password" id="newPassword" class="form-input" placeholder="New password" style="margin-top: 0.5rem;">
                         <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" style="margin-top: 0.5rem;">
-                        <button class="btn btn-primary" onclick="changePassword()" style="margin-top: 1rem;">Change Password</button>
+                        <button class="btn btn-primary" onclick="changePassword()" style="margin-top: 1rem;">
+                            <i class="fas fa-lock"></i>
+                            Change Password
+                        </button>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Account Actions</label>
+                        <label class="form-label">
+                            <i class="fas fa-cog"></i>
+                            Account Actions
+                        </label>
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <button class="btn btn-secondary" onclick="exportData()">Export My Data</button>
-                            <button class="btn btn-danger" onclick="showDeleteModal()">Delete Account</button>
+                            <button class="btn btn-secondary" onclick="exportData()">
+                                <i class="fas fa-download"></i>
+                                Export My Data
+                            </button>
+                            <button class="btn btn-danger" onclick="showDeleteModal()">
+                                <i class="fas fa-trash"></i>
+                                Delete Account
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -179,13 +325,22 @@
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
-            <h3>Delete Account</h3>
+            <h3 style="color: #ef4444; margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+                Delete Account
+            </h3>
             <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-            <p>All your posts, drafts, and data will be permanently deleted.</p>
+            <p style="color: #ef4444; font-weight: bold;">All your posts, drafts, and data will be permanently deleted.</p>
             <input type="password" id="deletePassword" class="form-input" placeholder="Enter your password to confirm" style="margin: 1rem 0;">
             <div class="form-actions">
-                <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
-                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="deleteAccount()">
+                    <i class="fas fa-trash"></i>
+                    Delete Account
+                </button>
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
