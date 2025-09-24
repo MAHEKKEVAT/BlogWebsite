@@ -1,4 +1,4 @@
-// profile.js - Compact Version
+// profile.js - Fixed to fetch from correct user document
 let currentUser, userProfile = null;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -10,6 +10,7 @@ function initializeProfile() {
         if (user) {
             currentUser = user;
             db = firebase.firestore();
+            console.log('👤 Current User UID:', currentUser.uid);
             setupEventListeners();
             loadUserProfile();
         } else {
@@ -31,15 +32,18 @@ async function loadUserProfile() {
         
         if (userDoc.exists) {
             userProfile = userDoc.data();
+            console.log('✅ User profile loaded:', userProfile);
             displayUserProfile();
             await loadUserStats();
         } else {
+            console.log('📝 Creating new user profile...');
             userProfile = createDefaultProfile();
             await saveProfileToFirestore();
             displayUserProfile();
             await loadUserStats();
         }
     } catch (error) {
+        console.error('❌ Error loading profile:', error);
         showStatus('Error loading profile', 'error');
     } finally {
         showLoading(false);
@@ -55,8 +59,7 @@ function createDefaultProfile() {
         city: '',
         role: 'user',
         status: 'active',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        stats: { draftsCount: 0, postsCount: 0, publishedCount: 0 }
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 }
 
@@ -67,7 +70,7 @@ function displayUserProfile() {
     document.getElementById('userEmail').textContent = userProfile.email;
     document.getElementById('userBio').textContent = userProfile.bio || 'No bio yet';
     document.getElementById('userCity').textContent = userProfile.city || 'Not specified';
-    document.getElementById('userRole').textContent = userProfile.role;
+    document.getElementById('userRole').textContent = userProfile.role || 'user';
     
     if (userProfile.createdAt) {
         const memberSince = userProfile.createdAt.toDate();
@@ -90,33 +93,143 @@ function displayUserProfile() {
 }
 
 async function loadUserStats() {
-    if (!userProfile) return;
+    if (!currentUser) return;
     
-    const stats = userProfile.stats || {};
+    try {
+        console.log('📊 Loading posts for user:', currentUser.uid);
+        
+        // Try to fetch from the current user's collections
+        const [draftsSnapshot, publishedSnapshot] = await Promise.all([
+            db.collection('users').doc(currentUser.uid).collection('drafts').get(),
+            db.collection('users').doc(currentUser.uid).collection('published').get()
+        ]);
+        
+        const draftsCount = draftsSnapshot.size;
+        const publishedCount = publishedSnapshot.size;
+        const totalPosts = draftsCount + publishedCount;
+        
+        console.log('📈 Posts found:', {
+            drafts: draftsCount,
+            published: publishedCount,
+            total: totalPosts
+        });
+        
+        // Update the UI
+        updateStatsUI(totalPosts, publishedCount, draftsCount);
+        
+        // If no posts found, try alternative user IDs
+        if (totalPosts === 0) {
+            console.log('🔍 No posts found, checking for alternative user IDs...');
+            await checkAlternativeUserIds();
+        } else {
+            await loadUserPosts();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading stats:', error);
+        showStatus('Error loading posts data', 'error');
+    }
+}
+
+async function checkAlternativeUserIds() {
+    try {
+        // Get all users to find the correct one
+        const usersSnapshot = await db.collection('users').get();
+        let correctUserId = null;
+        
+        usersSnapshot.forEach(doc => {
+            const userData = doc.data();
+            if (userData.email === currentUser.email) {
+                correctUserId = doc.id;
+                console.log('✅ Found matching user by email:', correctUserId);
+            }
+        });
+        
+        if (correctUserId && correctUserId !== currentUser.uid) {
+            console.log('🔄 Switching to correct user ID:', correctUserId);
+            await loadPostsFromUserId(correctUserId);
+        } else {
+            console.log('📭 No posts found for any user ID');
+            updateStatsUI(0, 0, 0);
+            showNoPostsMessage();
+        }
+        
+    } catch (error) {
+        console.error('Error checking alternative user IDs:', error);
+        updateStatsUI(0, 0, 0);
+        showNoPostsMessage();
+    }
+}
+
+async function loadPostsFromUserId(userId) {
+    try {
+        console.log('📖 Loading posts from user ID:', userId);
+        
+        const [draftsSnapshot, publishedSnapshot] = await Promise.all([
+            db.collection('users').doc(userId).collection('drafts').get(),
+            db.collection('users').doc(userId).collection('published').get()
+        ]);
+        
+        const draftsCount = draftsSnapshot.size;
+        const publishedCount = publishedSnapshot.size;
+        const totalPosts = draftsCount + publishedCount;
+        
+        console.log('📊 Posts found for user', userId, ':', {
+            drafts: draftsCount,
+            published: publishedCount,
+            total: totalPosts
+        });
+        
+        updateStatsUI(totalPosts, publishedCount, draftsCount);
+        
+        if (totalPosts > 0) {
+            await loadPostsFromSpecificUser(userId);
+        } else {
+            showNoPostsMessage();
+        }
+        
+    } catch (error) {
+        console.error('Error loading posts from user ID:', error);
+        updateStatsUI(0, 0, 0);
+        showNoPostsMessage();
+    }
+}
+
+function updateStatsUI(totalPosts, publishedCount, draftsCount) {
+    // Update sidebar stats
+    document.getElementById('totalPosts').textContent = totalPosts;
+    document.getElementById('publishedCount').textContent = publishedCount;
+    document.getElementById('draftsCount').textContent = draftsCount;
     
-    document.getElementById('totalPosts').textContent = stats.postsCount || 0;
-    document.getElementById('publishedCount').textContent = stats.publishedCount || 0;
-    document.getElementById('draftsCount').textContent = stats.draftsCount || 0;
+    // Update dashboard cards
+    document.getElementById('totalPostsCard').textContent = totalPosts;
+    document.getElementById('publishedPostsCard').textContent = publishedCount;
+    document.getElementById('draftPostsCard').textContent = draftsCount;
     
-    document.getElementById('totalPostsCard').textContent = stats.postsCount || 0;
-    document.getElementById('publishedPostsCard').textContent = stats.publishedCount || 0;
-    document.getElementById('draftPostsCard').textContent = stats.draftsCount || 0;
-    
-    if (userProfile.createdAt) {
+    // Calculate account age
+    if (userProfile && userProfile.createdAt) {
         const created = userProfile.createdAt.toDate();
         const diffDays = Math.ceil((new Date() - created) / (1000 * 60 * 60 * 24));
         document.getElementById('accountAge').textContent = diffDays;
     }
-    
-    await loadUserPosts();
 }
 
 async function loadUserPosts() {
+    await loadPostsFromSpecificUser(currentUser.uid);
+}
+
+async function loadPostsFromSpecificUser(userId) {
     try {
-        const querySnapshot = await db.collection('posts')
-            .where('authorId', '==', currentUser.uid)
-            .orderBy('createdAt', 'desc')
-            .get();
+        console.log('📝 Loading posts for user:', userId);
+        
+        const [draftsSnapshot, publishedSnapshot] = await Promise.all([
+            db.collection('users').doc(userId).collection('drafts')
+                .orderBy('createdAt', 'desc')
+                .get(),
+            db.collection('users').doc(userId).collection('published')
+                .orderBy('publishedAt', 'desc')
+                .get()
+        ]);
         
         const postsList = document.getElementById('postsList');
         const recentActivity = document.getElementById('recentActivity');
@@ -124,43 +237,118 @@ async function loadUserPosts() {
         postsList.innerHTML = '';
         recentActivity.innerHTML = '';
         
-        if (querySnapshot.empty) {
-            postsList.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6b7280;">No posts yet</div>';
-            recentActivity.innerHTML = '<div class="activity-item">No recent activity</div>';
+        // Combine all posts
+        const allPosts = [];
+        
+        draftsSnapshot.forEach(doc => {
+            const postData = doc.data();
+            allPosts.push({
+                id: doc.id,
+                ...postData,
+                type: 'draft',
+                collection: 'drafts',
+                date: postData.createdAt || postData.updatedAt,
+                userId: userId
+            });
+        });
+        
+        publishedSnapshot.forEach(doc => {
+            const postData = doc.data();
+            allPosts.push({
+                id: doc.id,
+                ...postData,
+                type: 'published',
+                collection: 'published',
+                date: postData.publishedAt || postData.createdAt,
+                userId: userId
+            });
+        });
+        
+        // Sort by date (newest first)
+        allPosts.sort((a, b) => {
+            const dateA = a.date ? a.date.toDate() : new Date(0);
+            const dateB = b.date ? b.date.toDate() : new Date(0);
+            return dateB - dateA;
+        });
+        
+        console.log('📄 Total posts to display:', allPosts.length);
+        
+        if (allPosts.length === 0) {
+            showNoPostsMessage();
             return;
         }
         
-        let activityCount = 0;
-        querySnapshot.forEach((doc) => {
-            const post = doc.data();
-            postsList.appendChild(createPostElement(post, doc.id));
-            
-            if (activityCount < 3) {
-                recentActivity.appendChild(createActivityElement(post));
-                activityCount++;
-            }
+        // Display all posts in My Posts tab
+        allPosts.forEach(post => {
+            postsList.appendChild(createPostElement(post));
         });
+        
+        // Display recent activity (latest 3 posts)
+        const recentPosts = allPosts.slice(0, 3);
+        recentPosts.forEach(post => {
+            recentActivity.appendChild(createActivityElement(post));
+        });
+        
     } catch (error) {
-        console.error('Error loading posts:', error);
+        console.error('❌ Error loading posts:', error);
+        showNoPostsMessage();
     }
 }
 
-function createPostElement(post, postId) {
-    const div = document.createElement('div');
-    const status = post.published ? 'published' : 'draft';
+function showNoPostsMessage() {
+    const postsList = document.getElementById('postsList');
+    const recentActivity = document.getElementById('recentActivity');
     
-    div.className = `post-card ${status}`;
+    postsList.innerHTML = `
+        <div style="text-align: center; padding: 3rem; color: #6b7280;">
+            <i class="fas fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3>No posts yet</h3>
+            <p>Start writing your first post!</p>
+            <button class="btn btn-primary" onclick="window.location.href='editor.html'">
+                <i class="fas fa-plus"></i>
+                Create New Post
+            </button>
+        </div>
+    `;
+    
+    recentActivity.innerHTML = `
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">No recent activity</div>
+                <div class="activity-time">Start writing to see your activity here</div>
+            </div>
+        </div>
+    `;
+}
+
+function createPostElement(post) {
+    const div = document.createElement('div');
+    const postDate = post.date ? post.date.toDate().toLocaleDateString() : 'Unknown date';
+    const contentPreview = post.content ? 
+        (post.content.length > 150 ? post.content.substring(0, 150) + '...' : post.content) : 
+        'No content';
+    
+    div.className = `post-card ${post.type}`;
     div.innerHTML = `
         <div class="post-header">
-            <h3 class="post-title">${post.title || 'Untitled'}</h3>
-            <span class="post-status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+            <h3 class="post-title">${post.title || 'Untitled Post'}</h3>
+            <span class="post-status ${post.type}">${post.type.charAt(0).toUpperCase() + post.type.slice(1)}</span>
         </div>
-        <div class="post-content">${post.content?.substring(0, 150) || 'No content'}...</div>
+        <div class="post-content">${contentPreview}</div>
         <div class="post-meta">
-            <span>Created: ${post.createdAt?.toDate().toLocaleDateString() || 'Unknown'}</span>
+            <span>${post.type === 'published' ? 'Published' : 'Created'}: ${postDate}</span>
             <div class="post-actions">
-                <button class="action-btn edit" onclick="editPost('${postId}')">Edit</button>
-                <button class="action-btn delete" onclick="deletePost('${postId}')">Delete</button>
+                <button class="action-btn edit" onclick="editPost('${post.id}', '${post.collection}', '${post.userId}')">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </button>
+                <button class="action-btn delete" onclick="deletePost('${post.id}', '${post.collection}', '${post.userId}')">
+                    <i class="fas fa-trash"></i>
+                    Delete
+                </button>
             </div>
         </div>
     `;
@@ -170,16 +358,18 @@ function createPostElement(post, postId) {
 
 function createActivityElement(post) {
     const div = document.createElement('div');
-    const activityType = post.published ? 'published a post' : 'saved a draft';
+    const activityType = post.type === 'published' ? 'published a post' : 'saved a draft';
+    const postDate = post.date ? post.date.toDate() : new Date();
+    const icon = post.type === 'published' ? 'fa-globe' : 'fa-edit';
     
     div.className = 'activity-item';
     div.innerHTML = `
         <div class="activity-icon">
-            <i class="fas ${post.published ? 'fa-globe' : 'fa-edit'}"></i>
+            <i class="fas ${icon}"></i>
         </div>
         <div class="activity-content">
-            <div class="activity-title">You ${activityType}</div>
-            <div class="activity-time">${formatRelativeTime(post.createdAt?.toDate() || new Date())}</div>
+            <div class="activity-title">You ${activityType}: "${post.title || 'Untitled'}"</div>
+            <div class="activity-time">${formatRelativeTime(postDate)}</div>
         </div>
     `;
     
@@ -196,7 +386,8 @@ async function saveProfile(e) {
             fullName: document.getElementById('fullName').value.trim(),
             bio: document.getElementById('bio').value.trim(),
             city: document.getElementById('city').value.trim(),
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+            lastActive: new Date().toISOString()
         };
         
         await db.collection('users').doc(currentUser.uid).update(updatedProfile);
@@ -204,6 +395,7 @@ async function saveProfile(e) {
         displayUserProfile();
         showStatus('Profile updated successfully!', 'success');
     } catch (error) {
+        console.error('Error saving profile:', error);
         showStatus('Error updating profile', 'error');
     } finally {
         showLoading(false);
@@ -236,7 +428,10 @@ function uploadAvatar(event) {
             displayUserProfile();
             showStatus('Avatar updated successfully!', 'success');
         })
-        .catch(error => showStatus('Error uploading avatar', 'error'))
+        .catch(error => {
+            console.error('Error uploading avatar:', error);
+            showStatus('Error uploading avatar', 'error');
+        })
         .finally(() => showLoading(false));
 }
 
@@ -248,31 +443,41 @@ function switchTab(tabName) {
 }
 
 function filterPosts(type) {
-    document.querySelectorAll('.post-card').forEach(post => {
-        post.style.display = type === 'all' ? 'block' : 
-                           post.classList.contains(type) ? 'block' : 'none';
+    const posts = document.querySelectorAll('.post-card');
+    posts.forEach(post => {
+        if (type === 'all') {
+            post.style.display = 'block';
+        } else if (type === 'published') {
+            post.style.display = post.classList.contains('published') ? 'block' : 'none';
+        } else if (type === 'drafts') {
+            post.style.display = post.classList.contains('draft') ? 'block' : 'none';
+        }
     });
 }
 
-function editPost(postId) {
-    window.location.href = `editor.html?postId=${postId}`;
+function editPost(postId, collection, userId = null) {
+    const targetUserId = userId || currentUser.uid;
+    window.location.href = `editor.html?postId=${postId}&collection=${collection}&userId=${targetUserId}`;
 }
 
-function deletePost(postId) {
-    if (confirm('Delete this post?')) {
-        db.collection('posts').doc(postId).delete()
-            .then(() => {
-                showStatus('Post deleted', 'success');
-                loadUserPosts();
-                loadUserProfile();
-            })
-            .catch(error => showStatus('Error deleting post', 'error'));
+async function deletePost(postId, collection, userId = null) {
+    if (confirm('Are you sure you want to delete this post?')) {
+        try {
+            const targetUserId = userId || currentUser.uid;
+            await db.collection('users').doc(targetUserId).collection(collection).doc(postId).delete();
+            showStatus('Post deleted successfully', 'success');
+            // Reload posts and stats
+            await loadUserStats();
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            showStatus('Error deleting post', 'error');
+        }
     }
 }
 
 function resetForm() {
     displayUserProfile();
-    showStatus('Form reset', 'warning');
+    showStatus('Form reset to current values', 'warning');
 }
 
 function formatRelativeTime(date) {
