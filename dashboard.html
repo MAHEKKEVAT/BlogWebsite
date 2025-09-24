@@ -5,104 +5,175 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | MindScribe</title>
     <link rel="stylesheet" href="css/dashboard.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Header -->
         <header class="header">
-            <div class="logo">MindScribe</div>
-            <nav class="nav">
-                <a href="dashboard.html" class="nav-link active">Dashboard</a>
-                <a href="editor.html" class="nav-link">New Post</a>
-                <a href="profile.html" class="nav-link">Profile</a>
-            </nav>
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-pen-fancy"></i>
+                    <span>MindScribe</span>
+                </div>
+                <nav class="nav">
+                    <a href="dashboard.html" class="nav-link active">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="editor.html" class="nav-link">
+                        <i class="fas fa-edit"></i>
+                        <span>New Post</span>
+                    </a>
+                    <a href="profile.html" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </nav>
+            </div>
             <div class="user-menu">
-                <span class="username">Loading...</span>
-                <button class="logout-btn">Logout</button>
+                <div class="user-info">
+                    <span class="username">Loading...</span>
+                    <span class="user-status">Online</span>
+                </div>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </header>
         
         <!-- Main Content -->
         <main class="main-content">
-            <div class="welcome-section">
-                <h1>Your Dashboard</h1>
-                <p>Manage your blog posts and track your writing journey</p>
-                <a href="editor.html" class="btn-primary">Create New Post</a>
-            </div>
-            
-            <div class="stats-section">
-                <div class="stat-card">
-                    <div class="stat-icon">📝</div>
-                    <h3>Total Posts</h3>
-                    <p class="stat-number">0</p>
-                    <div class="stat-trend">+0 this month</div>
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <div class="welcome-content">
+                    <h1>Welcome back! <span class="welcome-emoji">👋</span></h1>
+                    <p>Ready to create your next masterpiece? Your ideas are waiting to be written.</p>
+                    <a href="editor.html" class="btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Create New Post
+                    </a>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📤</div>
-                    <h3>Published</h3>
-                    <p class="stat-number">0</p>
-                    <div class="stat-trend">Ready to share</div>
+                <div class="welcome-graphic">
+                    <i class="fas fa-rocket"></i>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📄</div>
-                    <h3>Drafts</h3>
-                    <p class="stat-number">0</p>
-                    <div class="stat-trend">In progress</div>
+            </section>
+
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <div class="stats-header">
+                    <h2>Writing Overview</h2>
+                    <span class="stats-subtitle">Your publishing journey at a glance</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👁️</div>
-                    <h3>Total Views</h3>
-                    <p class="stat-number">0</p>
-                    <div class="stat-trend">All time</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Total Posts</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon published">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Published</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon drafts">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Drafts</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon views">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Total Views</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="quick-actions">
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="quick-actions">
                 <h2>Quick Actions</h2>
                 <div class="actions-grid">
                     <div class="action-card" onclick="window.location.href='editor.html'">
-                        <div class="action-icon">✏️</div>
+                        <div class="action-icon">
+                            <i class="fas fa-pen"></i>
+                        </div>
                         <h3>Write New Post</h3>
                         <p>Start creating fresh content</p>
                     </div>
                     <div class="action-card" onclick="showDrafts()">
-                        <div class="action-icon">📋</div>
+                        <div class="action-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
                         <h3>View Drafts</h3>
                         <p>Continue editing saved drafts</p>
                     </div>
                     <div class="action-card" onclick="showPublished()">
-                        <div class="action-icon">📊</div>
+                        <div class="action-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
                         <h3>Analytics</h3>
                         <p>Check post performance</p>
                     </div>
                     <div class="action-card" onclick="window.location.href='profile.html'">
-                        <div class="action-icon">👤</div>
-                        <h3>Profile Settings</h3>
-                        <p>Update your information</p>
+                        <div class="action-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <h3>Settings</h3>
+                        <p>Update your profile</p>
                     </div>
                 </div>
-            </div>
-            
-            <div class="posts-section">
+            </section>
+
+            <!-- Posts Section -->
+            <section class="posts-section">
                 <div class="section-header">
-                    <h2>Recent Posts</h2>
+                    <div>
+                        <h2>Your Posts</h2>
+                        <span class="section-subtitle">Manage and organize your content</span>
+                    </div>
                     <div class="view-controls">
-                        <button class="view-btn active" data-filter="all">All</button>
-                        <button class="view-btn" data-filter="published">Published</button>
-                        <button class="view-btn" data-filter="drafts">Drafts</button>
+                        <button class="view-btn active" data-filter="all">
+                            <i class="fas fa-layer-group"></i>
+                            All
+                        </button>
+                        <button class="view-btn" data-filter="published">
+                            <i class="fas fa-check-circle"></i>
+                            Published
+                        </button>
+                        <button class="view-btn" data-filter="drafts">
+                            <i class="fas fa-edit"></i>
+                            Drafts
+                        </button>
                     </div>
                 </div>
                 
                 <div class="posts-grid" id="posts-container">
                     <div class="empty-state">
-                        <div class="empty-icon">📝</div>
+                        <div class="empty-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
                         <h3>No posts yet</h3>
                         <p>Start your writing journey by creating your first blog post</p>
-                        <a href="editor.html" class="btn-primary">Create Your First Post</a>
+                        <a href="editor.html" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Create Your First Post
+                        </a>
                     </div>
                 </div>
                 
@@ -110,29 +181,55 @@
                     <div class="loading-spinner"></div>
                     <p>Loading your posts...</p>
                 </div>
-            </div>
+            </section>
         </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <span class="footer-text">MindScribe Blog Platform</span>
+                <div class="footer-status">
+                    <span class="status-indicator" id="firebaseStatus">
+                        <i class="fas fa-circle"></i>
+                        Firebase Connecting...
+                    </span>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <!-- Logout Confirmation Modal -->
+    <!-- Logout Modal -->
     <div id="logout-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
+                <i class="fas fa-sign-out-alt"></i>
                 <h3>Confirm Logout</h3>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to logout?</p>
                 <div class="modal-warning">
-                    ⚠️ Any unsaved changes will be lost
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Any unsaved changes will be lost
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn-cancel">Cancel</button>
-                <button class="btn-confirm-logout">Yes, Logout</button>
+                <button class="btn-cancel">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button class="btn-confirm-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Yes, Logout
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <script src="js/firebase-config.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
