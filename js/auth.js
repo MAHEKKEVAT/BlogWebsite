@@ -1,4 +1,4 @@
-// auth.js - Fixed version with better debugging
+// auth.js - Updated with complete Forgot Password functionality
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, checking Firebase...');
 
@@ -25,19 +25,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const splashScreen = document.getElementById('splash-screen');
     const signinPage = document.getElementById('signin-page');
     const registerPage = document.getElementById('register-page');
+    const forgotPasswordPage = document.getElementById('forgot-password-page');
     const signinForm = document.getElementById('signin-form');
     const registerForm = document.getElementById('register-form');
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
     const createAccountLink = document.getElementById('create-account');
     const backToLoginLink = document.getElementById('back-to-login');
     const forgotPasswordLink = document.getElementById('forgot-password');
+    const backFromForgotLink = document.getElementById('back-from-forgot');
 
     // Debug: Check if elements exist
     console.log('Elements found:', {
         splashScreen: !!splashScreen,
         signinPage: !!signinPage,
         registerPage: !!registerPage,
+        forgotPasswordPage: !!forgotPasswordPage,
         signinForm: !!signinForm,
-        registerForm: !!registerForm
+        registerForm: !!registerForm,
+        forgotPasswordForm: !!forgotPasswordForm
     });
 
     // Check if user is already logged in
@@ -168,7 +173,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', function(e) {
             e.preventDefault();
-            showPasswordResetForm();
+            showForgotPasswordPage();
+        });
+    }
+
+    // Back from forgot password
+    if (backFromForgotLink) {
+        backFromForgotLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showLoginForm();
         });
     }
 
@@ -185,6 +198,14 @@ document.addEventListener('DOMContentLoaded', function() {
         registerForm.addEventListener('submit', function(e) {
             e.preventDefault();
             handleRegistration();
+        });
+    }
+
+    // Forgot password form submission
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleForgotPassword();
         });
     }
 
@@ -347,6 +368,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    async function handleForgotPassword() {
+        const emailInput = document.getElementById('forgot-email');
+        if (!emailInput) {
+            showMessage('Form elements not found', 'error', 'forgot');
+            return;
+        }
+
+        const email = emailInput.value.trim();
+        const submitBtn = forgotPasswordForm.querySelector('.btn');
+
+        // Clear previous messages
+        clearMessages('forgot');
+
+        // Validation
+        if (!email) {
+            showMessage('Please enter your email address', 'error', 'forgot');
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showMessage('Please enter a valid email address', 'error', 'forgot');
+            return;
+        }
+
+        // Show loading state
+        setButtonLoading(submitBtn, true, 'Sending Reset Link...');
+
+        try {
+            console.log('Attempting to send password reset email to:', email);
+            
+            // Send password reset email
+            await auth.sendPasswordResetEmail(email);
+            
+            console.log('✅ Password reset email sent successfully');
+            showForgotPasswordSuccess(email);
+            
+        } catch (error) {
+            console.error('❌ Password reset error:', error);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            
+            handleAuthError(error, 'forgot');
+            setButtonLoading(submitBtn, false, 'Send Reset Link');
+        }
+    }
+
+    function showForgotPasswordSuccess(email) {
+        const messagesContainer = document.getElementById('forgot-messages');
+        if (!messagesContainer) return;
+
+        // Clear form and show success message
+        const emailInput = document.getElementById('forgot-email');
+        if (emailInput) emailInput.value = '';
+
+        const successMessage = `
+            <div class="message message-success-special">
+                Password reset link sent to <strong>${email}</strong><br>
+                Check your email inbox and follow the instructions.
+                <div class="countdown-timer">Redirecting to sign in page in <span id="countdown">5</span> seconds...</div>
+            </div>
+        `;
+
+        messagesContainer.innerHTML = successMessage;
+
+        // Start countdown timer
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdownElement) {
+                countdownElement.textContent = countdown;
+            }
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                showLoginForm();
+            }
+        }, 1000);
+    }
+
     function showRegistrationSuccess() {
         const container = document.querySelector('#register-page .container');
         if (!container) return;
@@ -372,21 +474,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
 
-    function showPasswordResetForm() {
-        const email = prompt('Please enter your email address to reset your password:');
-        if (email) {
-            if (isValidEmail(email)) {
-                auth.sendPasswordResetEmail(email)
-                    .then(() => {
-                        showMessage('Password reset email sent! Check your inbox.', 'success', 'signin');
-                    })
-                    .catch((error) => {
-                        console.error('Password reset error:', error);
-                        showMessage('Error sending reset email: ' + error.message, 'error', 'signin');
-                    });
-            } else {
-                showMessage('Please enter a valid email address', 'error', 'signin');
-            }
+    function showForgotPasswordPage() {
+        if (signinPage && forgotPasswordPage) {
+            signinPage.style.display = 'none';
+            registerPage.style.display = 'none';
+            forgotPasswordPage.style.display = 'block';
+            clearMessages('forgot');
+            
+            // Focus on email input
+            const emailInput = document.getElementById('forgot-email');
+            if (emailInput) emailInput.focus();
         }
     }
 
@@ -394,6 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (signinPage && registerPage) {
             signinPage.style.display = 'none';
             registerPage.style.display = 'block';
+            forgotPasswordPage.style.display = 'none';
             clearMessages('register');
             
             // Focus on first input
@@ -403,8 +501,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showLoginForm() {
-        if (registerPage && signinPage) {
+        if ((registerPage || forgotPasswordPage) && signinPage) {
             registerPage.style.display = 'none';
+            forgotPasswordPage.style.display = 'none';
             signinPage.style.display = 'block';
             clearMessages('signin');
             
@@ -538,6 +637,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'auth/app-not-authorized':
                 errorMessage = 'App not authorized. Please check Firebase configuration.';
+                break;
+            case 'auth/user-disabled':
+                errorMessage = 'This account has been disabled. Please contact support.';
                 break;
             default:
                 errorMessage = `Authentication error: ${error.message}`;

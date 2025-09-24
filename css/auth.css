@@ -362,3 +362,104 @@ input:valid {
         font-size: 1.5rem;
     }
 }
+
+/* Add these styles to your existing auth.css file */
+
+/* Forgot Password Page Styles */
+#forgot-password-page .container {
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.back-button {
+    margin-bottom: 30px;
+    cursor: pointer;
+}
+
+.back-button span {
+    color: #6a11cb;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.back-button span:hover {
+    color: #2575fc;
+}
+
+#forgot-password-form {
+    margin-bottom: 30px;
+}
+
+.reset-info {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    border-left: 4px solid #6a11cb;
+}
+
+.reset-info h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.reset-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.reset-info li {
+    padding: 8px 0;
+    padding-left: 25px;
+    position: relative;
+    color: #666;
+    line-height: 1.5;
+}
+
+.reset-info li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #10b981;
+    font-weight: bold;
+}
+
+/* Success message specific styles */
+.message-success-special {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+    padding: 15px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+    margin: 20px 0 !important;
+    animation: slideDown 0.3s ease !important;
+}
+
+.message-success-special:before {
+    content: "✓ ";
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Countdown timer */
+.countdown-timer {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 10px;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    #forgot-password-page .container {
+        padding: 20px 15px;
+    }
+    
+    .reset-info {
+        padding: 20px;
+    }
+}

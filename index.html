@@ -24,7 +24,7 @@
             <p class="subtitle">Sign in to your account</p>
             
             <form id="signin-form">
-                <div id="auth-messages"></div>
+                <div id="signin-messages"></div>
                 
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -103,6 +103,38 @@
             
             <div class="links">
                 <a href="#" id="back-to-login">Already have an account? Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Page -->
+    <div id="forgot-password-page" style="display: none;">
+        <div class="container">
+            <div class="back-button" id="back-from-forgot">
+                <span>← Back to Sign In</span>
+            </div>
+            
+            <h1>Reset Your Password</h1>
+            <p class="subtitle">Enter your email address and we'll send you a password reset link</p>
+            
+            <form id="forgot-password-form">
+                <div id="forgot-messages"></div>
+                
+                <div class="form-group">
+                    <label for="forgot-email">Email Address</label>
+                    <input type="email" id="forgot-email" placeholder="Enter your registered email" required>
+                </div>
+                
+                <button type="submit" class="btn">Send Reset Link</button>
+            </form>
+            
+            <div class="reset-info">
+                <h3>What happens next?</h3>
+                <ul>
+                    <li>Check your email inbox for a password reset link</li>
+                    <li>Click the link in the email to set a new password</li>
+                    <li>Return here to sign in with your new password</li>
+                </ul>
             </div>
         </div>
     </div>
