@@ -1,87 +1,105 @@
-// profile.js - Updated for Dashboard UI
+// profile.js - Fixed version
 
-// Firebase initialization
-let db;
-let storage;
+// Firebase variables (remove 'let' if already declared elsewhere)
 let currentUser;
 let userProfile = null;
 
 // Initialize profile page
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Profile page loaded');
     initializeFirebase();
-    setupEventListeners();
 });
 
 function initializeFirebase() {
+    console.log('📡 Initializing Firebase...');
+    
+    // Check if Firebase is already initialized
+    if (!firebase.apps.length) {
+        console.error('❌ Firebase not initialized');
+        return;
+    }
+    
+    // Set up auth state listener
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
+            console.log('✅ User authenticated:', user.email);
             currentUser = user;
             db = firebase.firestore();
             storage = firebase.storage();
+            setupEventListeners();
             loadUserProfile();
-            loadUserStats();
-            loadUserPosts();
         } else {
-            // Redirect to login if not authenticated
+            console.log('❌ No user authenticated, redirecting to login...');
             window.location.href = 'index.html';
         }
     });
 }
 
 function setupEventListeners() {
+    console.log('🔧 Setting up event listeners...');
+    
     // Profile form submission
-    document.getElementById('profileForm').addEventListener('submit', saveProfile);
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', saveProfile);
+    }
     
     // Avatar upload
-    document.getElementById('avatarUpload').addEventListener('change', uploadAvatar);
+    const avatarUpload = document.getElementById('avatarUpload');
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', uploadAvatar);
+    }
     
-    // Real-time form validation
-    document.getElementById('displayName').addEventListener('input', validateForm);
+    console.log('✅ Event listeners setup complete');
 }
 
-function loadUserProfile() {
+async function loadUserProfile() {
+    console.log('👤 Loading user profile...');
     showLoading(true);
     
-    // Load user profile from Firestore
-    db.collection('users').doc(currentUser.uid).get()
-        .then((doc) => {
-            if (doc.exists) {
-                userProfile = doc.data();
-                displayUserProfile();
-            } else {
-                // Create default profile using the provided user data
-                userProfile = createDefaultProfile();
-                saveProfileToFirestore();
-            }
-        })
-        .catch((error) => {
-            console.error('Error loading profile:', error);
-            showStatus('Error loading profile', 'error');
-        })
-        .finally(() => {
-            showLoading(false);
-        });
+    try {
+        if (!currentUser || !db) {
+            throw new Error('Firebase not properly initialized');
+        }
+        
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        
+        if (userDoc.exists) {
+            userProfile = userDoc.data();
+            console.log('✅ User profile loaded:', userProfile);
+            displayUserProfile();
+            await loadUserStats();
+        } else {
+            console.log('📝 Creating new user profile...');
+            userProfile = createDefaultProfile();
+            await saveProfileToFirestore();
+            displayUserProfile();
+            await loadUserStats();
+        }
+    } catch (error) {
+        console.error('❌ Error loading profile:', error);
+        showStatus('Error loading profile: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 
 function createDefaultProfile() {
-    // Use the provided user data structure
+    console.log('🆕 Creating default profile...');
     return {
-        displayName: "kartik",
-        email: "kartik@gmail.com",
-        fullName: "KARTIK",
-        nickName: "kartik",
-        city: "SURAT",
+        displayName: currentUser.displayName || currentUser.email.split('@')[0],
+        email: currentUser.email,
+        fullName: '',
+        nickName: '',
+        city: '',
         bio: '',
-        website: '',
-        location: '',
-        avatarUrl: '',
-        emailVerified: false,
-        profileComplete: true,
-        role: "user",
-        status: "active",
-        createdAt: new Date("24 September 2025 11:29:49 GMT+0530"),
-        lastLogin: new Date("24 September 2025 11:29:49 GMT+0530"),
-        lastActive: "2025-09-24T05:59:23.229Z",
+        emailVerified: currentUser.emailVerified || false,
+        profileComplete: false,
+        role: 'user',
+        status: 'active',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        lastActive: new Date().toISOString(),
         stats: {
             draftsCount: 0,
             postsCount: 0,
@@ -91,8 +109,15 @@ function createDefaultProfile() {
 }
 
 function displayUserProfile() {
+    if (!userProfile) {
+        console.error('❌ No user profile to display');
+        return;
+    }
+    
+    console.log('🎨 Displaying user profile...');
+    
     // Basic info
-    document.getElementById('userName').textContent = userProfile.displayName || userProfile.fullName || 'User';
+    document.getElementById('userName').textContent = userProfile.displayName || 'User';
     document.getElementById('userEmail').textContent = userProfile.email || 'No email';
     document.getElementById('userBio').textContent = userProfile.bio || 'No bio yet';
     document.getElementById('userCity').textContent = userProfile.city || 'Not specified';
@@ -119,123 +144,167 @@ function displayUserProfile() {
         document.getElementById('avatarImage').style.display = 'block';
         document.getElementById('avatarPlaceholder').style.display = 'none';
     } else {
-        // Show initials from display name or full name
-        const name = userProfile.displayName || userProfile.fullName || 'User';
+        const name = userProfile.displayName || userProfile.fullName || userProfile.email || 'User';
         const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         document.getElementById('avatarInitials').textContent = initials;
     }
     
-    // Update status badge color based on status
     updateStatusBadge();
+    console.log('✅ Profile display complete');
 }
 
-function updateStatusBadge() {
-    const statusBadge = document.getElementById('userStatus');
-    const status = userProfile.status || 'active';
-    
-    statusBadge.className = 'status-badge';
-    if (status === 'active') {
-        statusBadge.style.background = '#10b981';
-    } else if (status === 'inactive') {
-        statusBadge.style.background = '#6b7280';
-    } else if (status === 'suspended') {
-        statusBadge.style.background = '#ef4444';
-    }
-}
-
-function loadUserStats() {
+async function loadUserStats() {
     if (!userProfile) return;
     
-    const stats = userProfile.stats || {};
+    console.log('📊 Loading user stats...');
     
-    // Update sidebar stats
-    document.getElementById('totalPosts').textContent = stats.postsCount || 0;
-    document.getElementById('publishedCount').textContent = stats.publishedCount || 0;
-    document.getElementById('draftsCount').textContent = stats.draftsCount || 0;
-    
-    // Update dashboard cards
-    document.getElementById('totalPostsCard').textContent = stats.postsCount || 0;
-    document.getElementById('publishedPostsCard').textContent = stats.publishedCount || 0;
-    document.getElementById('draftPostsCard').textContent = stats.draftsCount || 0;
-    
-    // Calculate account age
-    if (userProfile.createdAt) {
-        const created = userProfile.createdAt.toDate ? userProfile.createdAt.toDate() : new Date(userProfile.createdAt);
-        const today = new Date();
-        const diffTime = Math.abs(today - created);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        document.getElementById('accountAge').textContent = diffDays;
+    try {
+        const stats = userProfile.stats || {};
+        
+        // Update sidebar stats
+        document.getElementById('totalPosts').textContent = stats.postsCount || 0;
+        document.getElementById('publishedCount').textContent = stats.publishedCount || 0;
+        document.getElementById('draftsCount').textContent = stats.draftsCount || 0;
+        
+        // Update dashboard cards
+        document.getElementById('totalPostsCard').textContent = stats.postsCount || 0;
+        document.getElementById('publishedPostsCard').textContent = stats.publishedCount || 0;
+        document.getElementById('draftPostsCard').textContent = stats.draftsCount || 0;
+        
+        // Calculate account age
+        if (userProfile.createdAt) {
+            const created = userProfile.createdAt.toDate ? userProfile.createdAt.toDate() : new Date(userProfile.createdAt);
+            const today = new Date();
+            const diffTime = Math.abs(today - created);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('accountAge').textContent = diffDays;
+        }
+        
+        await loadUserPosts();
+        console.log('✅ Stats loading complete');
+    } catch (error) {
+        console.error('❌ Error loading stats:', error);
     }
 }
 
-function loadUserPosts() {
-    // Load user's posts from Firestore
-    db.collection('posts')
-        .where('authorId', '==', currentUser.uid)
-        .orderBy('createdAt', 'desc')
-        .get()
-        .then((querySnapshot) => {
-            const postsList = document.getElementById('postsList');
-            postsList.innerHTML = '';
+async function loadUserPosts() {
+    console.log('📝 Loading user posts...');
+    
+    try {
+        const querySnapshot = await db.collection('posts')
+            .where('authorId', '==', currentUser.uid)
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        const postsList = document.getElementById('postsList');
+        const recentActivity = document.getElementById('recentActivity');
+        
+        postsList.innerHTML = '';
+        recentActivity.innerHTML = '';
+        
+        if (querySnapshot.empty) {
+            postsList.innerHTML = `
+                <div style="text-align: center; padding: 3rem; color: #6b7280;">
+                    <i class="fas fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>No posts yet</h3>
+                    <p>Start writing your first post!</p>
+                    <button class="btn btn-primary" onclick="window.location.href='editor.html'">
+                        <i class="fas fa-plus"></i>
+                        Create New Post
+                    </button>
+                </div>
+            `;
             
-            if (querySnapshot.empty) {
-                postsList.innerHTML = `
-                    <div style="text-align: center; padding: 3rem; color: #6b7280;">
-                        <i class="fas fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <h3>No posts yet</h3>
-                        <p>Start writing your first post!</p>
-                        <button class="btn btn-primary" onclick="window.location.href='editor.html'">
-                            <i class="fas fa-plus"></i>
-                            Create New Post
-                        </button>
+            recentActivity.innerHTML = `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-info-circle"></i>
                     </div>
-                `;
-                return;
-            }
+                    <div class="activity-content">
+                        <div class="activity-title">No recent activity</div>
+                        <div class="activity-time">Start writing to see your activity here</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        let activityCount = 0;
+        querySnapshot.forEach((doc) => {
+            const post = doc.data();
+            const postElement = createPostElement(post, doc.id);
+            postsList.appendChild(postElement);
             
-            querySnapshot.forEach((doc) => {
-                const post = doc.data();
-                const postElement = createPostElement(post, doc.id);
-                postsList.appendChild(postElement);
-            });
-        })
-        .catch((error) => {
-            console.error('Error loading posts:', error);
+            if (activityCount < 3) {
+                const activityElement = createActivityElement(post, doc.id);
+                recentActivity.appendChild(activityElement);
+                activityCount++;
+            }
         });
+        
+        console.log('✅ Posts loading complete');
+    } catch (error) {
+        console.error('❌ Error loading posts:', error);
+    }
 }
 
 function createPostElement(post, postId) {
+    const div = document.createElement('div');
     const postDate = post.createdAt ? post.createdAt.toDate().toLocaleDateString() : 'Unknown date';
     const status = post.published ? 'published' : 'draft';
+    const statusText = post.published ? 'Published' : 'Draft';
     
-    return document.createElement('div').innerHTML = `
-        <div class="post-card ${status}">
-            <div class="post-header">
-                <h3 class="post-title">${post.title || 'Untitled Post'}</h3>
-                <span class="post-status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
-            </div>
-            <div class="post-content">
-                ${post.content ? post.content.substring(0, 200) + '...' : 'No content'}
-            </div>
-            <div class="post-meta">
-                <span>Created: ${postDate}</span>
-                <div class="post-actions">
-                    <button class="action-btn edit" onclick="editPost('${postId}')">
-                        <i class="fas fa-edit"></i>
-                        Edit
-                    </button>
-                    <button class="action-btn delete" onclick="deletePost('${postId}')">
-                        <i class="fas fa-trash"></i>
-                        Delete
-                    </button>
-                </div>
+    div.className = `post-card ${status}`;
+    div.innerHTML = `
+        <div class="post-header">
+            <h3 class="post-title">${post.title || 'Untitled Post'}</h3>
+            <span class="post-status ${status}">${statusText}</span>
+        </div>
+        <div class="post-content">
+            ${post.content ? (post.content.length > 150 ? post.content.substring(0, 150) + '...' : post.content) : 'No content'}
+        </div>
+        <div class="post-meta">
+            <span>Created: ${postDate}</span>
+            <div class="post-actions">
+                <button class="action-btn edit" onclick="editPost('${postId}')">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </button>
+                <button class="action-btn delete" onclick="deletePost('${postId}')">
+                    <i class="fas fa-trash"></i>
+                    Delete
+                </button>
             </div>
         </div>
     `;
+    
+    return div;
 }
 
-function saveProfile(e) {
+function createActivityElement(post, postId) {
+    const div = document.createElement('div');
+    const postDate = post.createdAt ? post.createdAt.toDate() : new Date();
+    const activityType = post.published ? 'published a post' : 'saved a draft';
+    const icon = post.published ? 'fa-globe' : 'fa-edit';
+    
+    div.className = 'activity-item';
+    div.innerHTML = `
+        <div class="activity-icon">
+            <i class="fas ${icon}"></i>
+        </div>
+        <div class="activity-content">
+            <div class="activity-title">You ${activityType}: "${post.title || 'Untitled'}"</div>
+            <div class="activity-time">${formatRelativeTime(postDate)}</div>
+        </div>
+    `;
+    
+    return div;
+}
+
+async function saveProfile(e) {
     e.preventDefault();
+    
+    console.log('💾 Saving profile...');
     
     if (!validateForm()) {
         return;
@@ -243,26 +312,30 @@ function saveProfile(e) {
     
     showLoading(true);
     
-    // Update user profile object
-    userProfile.displayName = document.getElementById('displayName').value;
-    userProfile.fullName = document.getElementById('fullName').value;
-    userProfile.nickName = document.getElementById('nickName').value;
-    userProfile.bio = document.getElementById('bio').value;
-    userProfile.city = document.getElementById('city').value;
-    userProfile.updatedAt = new Date();
-    
-    saveProfileToFirestore()
-        .then(() => {
-            showStatus('Profile updated successfully!', 'success');
-            displayUserProfile(); // Refresh display
-        })
-        .catch((error) => {
-            console.error('Error saving profile:', error);
-            showStatus('Error updating profile', 'error');
-        })
-        .finally(() => {
-            showLoading(false);
-        });
+    try {
+        const updatedProfile = {
+            displayName: document.getElementById('displayName').value.trim(),
+            fullName: document.getElementById('fullName').value.trim(),
+            nickName: document.getElementById('nickName').value.trim(),
+            bio: document.getElementById('bio').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            profileComplete: true,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+            lastActive: new Date().toISOString()
+        };
+        
+        await db.collection('users').doc(currentUser.uid).update(updatedProfile);
+        
+        userProfile = { ...userProfile, ...updatedProfile };
+        displayUserProfile();
+        showStatus('Profile updated successfully!', 'success');
+        console.log('✅ Profile saved successfully');
+    } catch (error) {
+        console.error('❌ Error saving profile:', error);
+        showStatus('Error updating profile: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 
 function saveProfileToFirestore() {
@@ -278,7 +351,7 @@ function uploadAvatar(event) {
         return;
     }
     
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
         showStatus('Image size should be less than 5MB', 'error');
         return;
     }
@@ -291,16 +364,19 @@ function uploadAvatar(event) {
     avatarRef.put(file)
         .then((snapshot) => snapshot.ref.getDownloadURL())
         .then((downloadURL) => {
-            userProfile.avatarUrl = downloadURL;
-            return saveProfileToFirestore();
+            return db.collection('users').doc(currentUser.uid).update({
+                avatarUrl: downloadURL,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
         })
         .then(() => {
+            userProfile.avatarUrl = downloadURL;
+            displayUserProfile();
             showStatus('Avatar updated successfully!', 'success');
-            displayUserProfile(); // Refresh avatar display
         })
         .catch((error) => {
             console.error('Error uploading avatar:', error);
-            showStatus('Error uploading avatar', 'error');
+            showStatus('Error uploading avatar: ' + error.message, 'error');
         })
         .finally(() => {
             showLoading(false);
@@ -309,15 +385,9 @@ function uploadAvatar(event) {
 
 function validateForm() {
     const displayName = document.getElementById('displayName').value.trim();
-    const fullName = document.getElementById('fullName').value.trim();
     
     if (!displayName) {
         showStatus('Display name is required', 'error');
-        return false;
-    }
-    
-    if (!fullName) {
-        showStatus('Full name is required', 'error');
         return false;
     }
     
@@ -325,30 +395,24 @@ function validateForm() {
 }
 
 function resetForm() {
-    displayUserProfile(); // Reset to current values
+    displayUserProfile();
     showStatus('Form reset to current values', 'warning');
 }
 
 function switchTab(tabName) {
-    // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
     
-    // Deactivate all tab buttons
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     
-    // Show selected tab
     document.getElementById(tabName + 'Tab').classList.add('active');
-    
-    // Activate selected tab button
     event.currentTarget.classList.add('active');
 }
 
 function filterPosts(filter) {
-    // This would filter the posts list based on the selected filter
     const posts = document.querySelectorAll('.post-card');
     posts.forEach(post => {
         if (filter === 'all') {
@@ -362,21 +426,20 @@ function filterPosts(filter) {
 }
 
 function editPost(postId) {
-    // Redirect to editor with post ID
     window.location.href = `editor.html?postId=${postId}`;
 }
 
 function deletePost(postId) {
-    if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+    if (confirm('Are you sure you want to delete this post?')) {
         db.collection('posts').doc(postId).delete()
             .then(() => {
                 showStatus('Post deleted successfully', 'success');
-                loadUserPosts(); // Refresh posts list
-                loadUserStats(); // Refresh stats
+                loadUserPosts();
+                loadUserProfile();
             })
             .catch((error) => {
                 console.error('Error deleting post:', error);
-                showStatus('Error deleting post', 'error');
+                showStatus('Error deleting post: ' + error.message, 'error');
             });
     }
 }
@@ -403,16 +466,13 @@ function changePassword() {
     
     showLoading(true);
     
-    // Reauthenticate user
     const credential = firebase.auth.EmailAuthProvider.credential(
         currentUser.email, 
         currentPassword
     );
     
     currentUser.reauthenticateWithCredential(credential)
-        .then(() => {
-            return currentUser.updatePassword(newPassword);
-        })
+        .then(() => currentUser.updatePassword(newPassword))
         .then(() => {
             showStatus('Password updated successfully!', 'success');
             document.getElementById('currentPassword').value = '';
@@ -431,7 +491,6 @@ function changePassword() {
 function exportData() {
     showLoading(true);
     
-    // Export user data as JSON
     const exportData = {
         profile: userProfile,
         exportDate: new Date().toISOString()
@@ -468,30 +527,18 @@ function deleteAccount() {
     
     showLoading(true);
     
-    // Reauthenticate and delete account
     const credential = firebase.auth.EmailAuthProvider.credential(
         currentUser.email, 
         password
     );
     
     currentUser.reauthenticateWithCredential(credential)
-        .then(() => {
-            // Delete user data first
-            return db.collection('users').doc(currentUser.uid).delete();
-        })
-        .then(() => {
-            // Delete user posts
-            return deleteUserPosts();
-        })
-        .then(() => {
-            // Delete user account
-            return currentUser.delete();
-        })
+        .then(() => db.collection('users').doc(currentUser.uid).delete())
+        .then(() => deleteUserPosts())
+        .then(() => currentUser.delete())
         .then(() => {
             showStatus('Account deleted successfully', 'success');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 2000);
+            setTimeout(() => window.location.href = 'index.html', 2000);
         })
         .catch((error) => {
             console.error('Error deleting account:', error);
@@ -509,11 +556,23 @@ function deleteUserPosts() {
         .get()
         .then((querySnapshot) => {
             const batch = db.batch();
-            querySnapshot.forEach((doc) => {
-                batch.delete(doc.ref);
-            });
+            querySnapshot.forEach((doc) => batch.delete(doc.ref));
             return batch.commit();
         });
+}
+
+function updateStatusBadge() {
+    const statusBadge = document.getElementById('userStatus');
+    const status = userProfile.status || 'active';
+    
+    statusBadge.className = 'status-badge';
+    if (status === 'active') {
+        statusBadge.style.background = '#10b981';
+    } else if (status === 'inactive') {
+        statusBadge.style.background = '#6b7280';
+    } else if (status === 'suspended') {
+        statusBadge.style.background = '#ef4444';
+    }
 }
 
 function showLoading(show) {
@@ -545,3 +604,15 @@ function formatRelativeTime(date) {
     
     return date.toLocaleDateString();
 }
+
+// Make functions globally available
+window.switchTab = switchTab;
+window.filterPosts = filterPosts;
+window.editPost = editPost;
+window.deletePost = deletePost;
+window.changePassword = changePassword;
+window.exportData = exportData;
+window.showDeleteModal = showDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.deleteAccount = deleteAccount;
+window.resetForm = resetForm;
